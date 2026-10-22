@@ -3,303 +3,266 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>RANKING - DRAW RUN</title>
+  <title>ランキング | DRAW LINE RUN</title>
   <style>
+
+    :root {
+      --pop-sky-top: #7ec8ff;
+      --pop-sky-bot: #e8f6ff;
+      --pop-card: #ffffff;
+      --pop-ink: #1a2a4a;
+      --pop-accent: #ffb800;
+      --pop-cyan: #00c2ff;
+      --pop-pink: #ff5fa2;
+      --pop-green: #3ddc84;
+      --pop-shadow: 0 8px 24px rgba(30, 80, 140, 0.18);
+    }
     html, body {
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
       margin: 0;
       padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding-top: 4vh;
-      background:
-        radial-gradient(ellipse at 20% 15%, rgba(0, 180, 255, 0.08) 0%, transparent 45%),
-        radial-gradient(ellipse at 80% 80%, rgba(80, 40, 160, 0.12) 0%, transparent 50%),
-        linear-gradient(180deg, #070b16 0%, #0c1224 50%, #0a1020 100%);
-      color: #e8f4ff;
-      font-family: 'Helvetica Neue', Arial, sans-serif;
+      width: 100%;
+      min-height: 100%;
+      font-family: 'Helvetica Neue', 'Hiragino Sans', 'Noto Sans JP', Arial, sans-serif;
+      background: linear-gradient(180deg, var(--pop-sky-top) 0%, #b8e4ff 40%, var(--pop-sky-bot) 100%);
+      color: var(--pop-ink);
     }
-
-    body { transform-origin: center top; }
-
-    h1 {
-      font-size: 28px;
-      font-weight: 900;
-      letter-spacing: 4px;
-      margin: 0 0 14px 0;
-      color: #fff;
-      text-shadow:
-        0 0 12px rgba(0, 229, 255, 0.7),
-        0 0 28px rgba(0, 180, 255, 0.35);
-    }
-
-    .last-score-container {
-      position: relative;
-      background: rgba(8, 20, 40, 0.65);
-      border: 1.5px solid rgba(0, 229, 255, 0.35);
-      border-radius: 16px;
-      padding: 12px 18px;
-      margin-bottom: 14px;
-      width: 82%;
-      max-width: 360px;
+    body {
       display: flex;
-      align-items: center;
       justify-content: center;
-      box-shadow: 0 0 18px rgba(0, 180, 255, 0.12);
+      align-items: flex-start;
+      padding: 16px 12px 32px;
       box-sizing: border-box;
     }
-
-    .last-score-label {
-      position: absolute;
-      left: 16px;
-      font-size: 12px;
-      font-weight: bold;
-      color: rgba(180, 220, 255, 0.7);
+    .pop-wrap {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 24px;
+      box-shadow: var(--pop-shadow);
+      border: 3px solid rgba(255, 255, 255, 0.9);
+      overflow: hidden;
+      position: relative;
+    }
+    .pop-header {
+      background: linear-gradient(135deg, #4db8ff 0%, #7ee0ff 50%, #ffe566 100%);
+      padding: 18px 16px 16px;
+      text-align: center;
+      position: relative;
+    }
+    .pop-header h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 2px 0 rgba(0, 80, 140, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15);
       letter-spacing: 1px;
     }
-
-    .last-score-val-area {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    .pop-header .sub {
+      margin-top: 4px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.95);
+      font-weight: bold;
     }
-
-    .last-score-val {
-      font-family: monospace;
-      font-size: 20px;
-      color: #00e5ff;
-      text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+    .pop-body {
+      padding: 16px 14px 20px;
     }
-
-    .last-score-date {
-      font-size: 10px;
-      color: rgba(180, 200, 220, 0.55);
-      margin-top: 2px;
+    .pop-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(40, 100, 160, 0.1);
+      border: 2px solid #e8f4ff;
     }
-
-    .ranking-container {
-      background: rgba(8, 16, 32, 0.7);
-      border: 1.5px solid rgba(0, 200, 255, 0.22);
-      border-radius: 18px;
-      padding: 10px 16px;
-      width: 82%;
-      max-width: 360px;
-      max-height: 36vh;
-      overflow-y: auto;
-      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
-      box-sizing: border-box;
-    }
-
-    .ranking-container::-webkit-scrollbar { width: 5px; }
-    .ranking-container::-webkit-scrollbar-thumb {
-      background: rgba(0, 229, 255, 0.4);
-      border-radius: 3px;
-    }
-
-    ol { list-style: none; padding: 0; margin: 0; }
-
-    li {
-      position: relative;
-      display: flex;
+    .pop-btn {
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 8px 18px;
-      margin: 6px 0;
-      background: rgba(255, 255, 255, 0.04);
-      border-radius: 12px;
+      gap: 6px;
+      padding: 12px 20px;
+      border-radius: 999px;
+      border: 3px solid #1a3a6a;
+      background: linear-gradient(180deg, #ffe566 0%, #ffb800 100%);
+      color: #1a2a4a;
+      font-weight: 900;
       font-size: 15px;
-      font-weight: bold;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    li:nth-child(1) {
-      border-color: rgba(255, 215, 0, 0.55);
-      box-shadow: 0 0 12px rgba(255, 215, 0, 0.12);
-    }
-    li:nth-child(2) { border-color: rgba(192, 192, 192, 0.45); }
-    li:nth-child(3) { border-color: rgba(205, 127, 50, 0.5); }
-
-    .rank-num {
-      position: absolute;
-      left: 16px;
-      font-size: 15px;
-      font-style: italic;
-      color: rgba(200, 220, 255, 0.75);
-    }
-
-    .score-val {
-      font-family: monospace;
-      font-size: 16px;
-      color: #00e5ff;
-    }
-
-    .button-container {
-      display: flex;
-      gap: 14px;
-      margin-top: 18px;
-    }
-
-    .btn {
-      padding: 11px 26px;
       text-decoration: none;
-      border-radius: 24px;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #c99000, 0 6px 14px rgba(0, 0, 0, 0.12);
+      transition: transform 0.1s;
+    }
+    .pop-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #c99000, 0 3px 8px rgba(0, 0, 0, 0.12);
+    }
+    .pop-btn.cyan {
+      background: linear-gradient(180deg, #7ee0ff 0%, #00c2ff 100%);
+      border-color: #0a5a8a;
+      box-shadow: 0 4px 0 #0080b0, 0 6px 14px rgba(0, 0, 0, 0.12);
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    .pop-btn.pink {
+      background: linear-gradient(180deg, #ff9fd0 0%, #ff5fa2 100%);
+      border-color: #a03060;
+      box-shadow: 0 4px 0 #c04070, 0 6px 14px rgba(0, 0, 0, 0.12);
+      color: #fff;
+    }
+    .pop-footer {
+      text-align: center;
+      padding: 4px 0 8px;
+    }
+    .rank-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      margin-bottom: 8px;
+      background: linear-gradient(90deg, #f0f9ff, #fff);
+      border: 2px solid #d6eeff;
+    }
+    .rank-item.top1 { border-color: #ffd700; background: linear-gradient(90deg, #fff8e0, #fff); }
+    .rank-item.top2 { border-color: #c0d0e0; }
+    .rank-item.top3 { border-color: #e8b080; }
+    .rank-num {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: #4db8ff;
+      color: #fff;
+      font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .rank-item.top1 .rank-num { background: linear-gradient(180deg, #ffe566, #ffb800); color: #5a3a00; }
+    .rank-score { margin-left: auto; font-weight: 900; color: #00a0e0; font-size: 16px; }
+    .skin-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .skin-card {
+      border-radius: 16px;
+      border: 3px solid #d6eeff;
+      background: #f8fcff;
+      padding: 10px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.12s, border-color 0.12s;
+    }
+    .skin-card:hover { transform: scale(1.03); }
+    .skin-card.selected {
+      border-color: #ffb800;
+      background: #fff8e0;
+      box-shadow: 0 0 0 3px rgba(255, 184, 0, 0.25);
+    }
+    .skin-card.locked { opacity: 0.55; filter: grayscale(0.4); }
+    .skin-card img {
+      width: 72px; height: 72px;
+      object-fit: contain;
+      image-rendering: auto;
+    }
+    .skin-name { font-size: 12px; font-weight: bold; margin-top: 4px; color: #1a2a4a; }
+    .skin-unlock { font-size: 10px; color: #888; margin-top: 2px; line-height: 1.3; }
+    .howto-step {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .howto-num {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #ffe566, #ffb800);
+      border: 2px solid #1a3a6a;
+      font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 13px;
+    }
+    .howto-text { font-size: 13px; line-height: 1.5; color: #2a3a5a; }
+    .howto-text strong { color: #0080c0; }
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
       font-weight: bold;
       font-size: 14px;
-      border: none;
+    }
+    input[type="range"] {
+      flex: 1;
+      accent-color: #00c2ff;
+    }
+    .toggle {
+      appearance: none;
+      width: 48px; height: 28px;
+      border-radius: 14px;
+      background: #c8d8e8;
+      position: relative;
       cursor: pointer;
-      display: inline-block;
-      text-align: center;
-      letter-spacing: 1px;
-      transition: transform 0.12s, box-shadow 0.2s;
+      border: 2px solid #8aa;
+      transition: background 0.15s;
     }
+    .toggle:checked { background: #3ddc84; border-color: #1a8a50; }
+    .toggle::after {
+      content: "";
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      transition: left 0.15s;
+    }
+    .toggle:checked::after { left: 22px; }
 
-    .btn:active { transform: scale(0.96); }
-
-    .back-btn {
-      background: transparent;
-      color: #00e5ff;
-      border: 1.5px solid #00e5ff;
-      box-shadow: 0 0 14px rgba(0, 229, 255, 0.25);
-    }
-    .back-btn:hover {
-      box-shadow: 0 0 22px rgba(0, 229, 255, 0.45);
-      background: rgba(0, 229, 255, 0.08);
-    }
-
-    .reset-btn {
-      background: rgba(255, 60, 80, 0.08);
-      color: #ff8a9a;
-      border: 1px solid rgba(255, 80, 100, 0.4);
-    }
   </style>
 </head>
 <body>
-
-  <h1>RANKING</h1>
-
-  <div class="last-score-container">
-    <span class="last-score-label">前回の記録</span>
-    <div class="last-score-val-area">
-      <span class="last-score-val" id="last-score-display">0 m</span>
-      <span class="last-score-date" id="last-date-display"></span>
+  <div class="pop-wrap">
+    <div class="pop-header">
+      <h1>🏆 ランキング</h1>
+      <div class="sub">スコアアタックの記録</div>
+    </div>
+    <div class="pop-body">
+      <div class="pop-card" id="rank-list">
+        <div style="text-align:center;color:#888;padding:20px;">読み込み中...</div>
+      </div>
+      <div class="pop-footer">
+        <a class="pop-btn" href="index.html">← タイトルへ</a>
+      </div>
     </div>
   </div>
-
-  <div class="ranking-container">
-    <ol id="ranking-list"></ol>
-  </div>
-
-  <div class="button-container">
-    <button class="btn reset-btn menu-btn" id="reset-btn">リセット</button>
-    <a href="index.html" class="btn back-btn menu-btn">BACK</a>
-  </div>
-
-  <audio id="setting-bgm" src="title.mp3" loop></audio>
-  <audio id="sfx-button" src="sfx_button.mp3" preload="auto"></audio>
-<script>
-    function adjustScale() {
-      const scale = Math.min(window.innerWidth / 400, window.innerHeight / 700);
-      document.body.style.transform = `scale(${scale > 1 ? 1 : scale})`;
-    }
-    window.addEventListener("load", adjustScale);
-    window.addEventListener("resize", adjustScale);
-
-    const settingBgm = document.getElementById("setting-bgm");
-    const sfxButton = document.getElementById("sfx-button");
-
-    function isSeEnabled() {
-      return (localStorage.getItem("drawRunSeEnabled") ?? sessionStorage.getItem("drawRunSeEnabled")) !== "false";
-    }
-
-    function getSeVolume() {
-      const saved = localStorage.getItem("drawRunSeVolume") ?? sessionStorage.getItem("drawRunSeVolume");
-      const value = Number(saved);
-      if (!Number.isFinite(value)) return 0.28;
-      return Math.max(0, Math.min(100, value)) / 100;
-    }
-
-    function playButtonSfx() {
-      if (!sfxButton || !isSeEnabled()) return;
-      const volume = getSeVolume();
-      if (volume <= 0) return;
-      sfxButton.volume = volume;
-      sfxButton.currentTime = 0;
-      sfxButton.play().catch(() => {});
-    }
-
-    const menuButtons = document.querySelectorAll(".menu-btn");
-    menuButtons.forEach((btn) => {
-      btn.addEventListener("pointerdown", () => playButtonSfx());
-      btn.addEventListener("click", (e) => {
-        if (e.detail === 0) playButtonSfx();
-        if (btn.tagName === "A" || btn.href) {
-          e.preventDefault();
-          const targetUrl = btn.href;
-          setTimeout(() => { window.location.href = targetUrl; }, 250);
-        }
-      });
-    });
-
-    function loadRankingData() {
-      const list = document.getElementById("ranking-list");
-      const lastScoreEl = document.getElementById("last-score-display");
-      const lastDateEl = document.getElementById("last-date-display");
-      list.innerHTML = "";
-
+  <script>
+    function loadRanks() {
+      const el = document.getElementById("rank-list");
       let scores = [];
       try {
         scores = JSON.parse(localStorage.getItem("drawRunScores")) || [];
       } catch (e) {}
-
-      if (scores.length === 0) {
-        const li = document.createElement("li");
-        li.innerHTML = '<span style="color:rgba(180,200,220,0.5);font-weight:normal;">まだ記録がありません</span>';
-        list.appendChild(li);
-      } else {
-        scores.slice(0, 5).forEach((entry, i) => {
-          const li = document.createElement("li");
-          const score = typeof entry === "object" ? entry.score : entry;
-          li.innerHTML = `<span class="rank-num">${i + 1}</span><span class="score-val">${score} m</span>`;
-          list.appendChild(li);
-        });
+      const normalized = scores.map((s) => {
+        if (typeof s === "object" && s) return { score: Number(s.score) || 0, date: s.date || "" };
+        return { score: Number(s) || 0, date: "" };
+      }).filter((s) => s.score > 0);
+      normalized.sort((a, b) => b.score - a.score);
+      const top = normalized.slice(0, 10);
+      if (!top.length) {
+        el.innerHTML = '<div style="text-align:center;color:#888;padding:24px;">まだ記録がありません<br><small>スコアアタックに挑戦しよう！</small></div>';
+        return;
       }
-
-      try {
-        const last = JSON.parse(localStorage.getItem("drawRunLastScore"));
-        if (last) {
-          lastScoreEl.textContent = (last.score != null ? last.score : last) + " m";
-          if (last.date) lastDateEl.textContent = last.date;
-        }
-      } catch (e) {}
+      el.innerHTML = top.map((s, i) => {
+        const cls = i === 0 ? "top1" : i === 1 ? "top2" : i === 2 ? "top3" : "";
+        return '<div class="rank-item ' + cls + '">' +
+          '<div class="rank-num">' + (i + 1) + '</div>' +
+          '<div><div style="font-weight:bold;font-size:14px;">記録</div>' +
+          (s.date ? '<div style="font-size:11px;color:#888;">' + s.date + '</div>' : '') +
+          '</div><div class="rank-score">' + s.score + ' m</div></div>';
+      }).join("");
     }
-
-    loadRankingData();
-
-    const resetBtn = document.getElementById("reset-btn");
-    resetBtn.addEventListener("click", () => {
-      if (confirm("本当にランキングと前回の記録をリセットしますか？")) {
-        localStorage.removeItem("drawRunScores");
-        localStorage.removeItem("drawRunLastScore");
-        loadRankingData();
-      }
-    });
-
-    const savedVolume = localStorage.getItem("drawRunBgmVolume");
-    const savedPlayState = localStorage.getItem("drawRunBgmPlaying");
-    const savedCurrentTime = localStorage.getItem("drawRunBgmCurrentTime");
-    let isPlaying = savedPlayState !== "false";
-    if (savedVolume !== null) settingBgm.volume = savedVolume / 100;
-    else settingBgm.volume = 0.5;
-    if (savedCurrentTime !== null) settingBgm.currentTime = parseFloat(savedCurrentTime);
-    if (isPlaying) settingBgm.play().catch(() => {});
-    else settingBgm.pause();
-    window.addEventListener("beforeunload", () => {
-      localStorage.setItem("drawRunBgmCurrentTime", settingBgm.currentTime);
-    });
+    loadRanks();
   </script>
 </body>
 </html>

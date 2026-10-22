@@ -182,7 +182,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-image: url('start-bg.png');
+      background-image: url('UI/start-bg.png'), url('ui/start-bg.png'), url('start-bg.png');
       background-size: 100% 100%;
       background-position: center;
       background-repeat: no-repeat;
@@ -216,44 +216,59 @@
     }
 
     .menu-btn:hover {
-      transform: translate(-50%, -50%) scale(1.05);
-      filter: brightness(1.15);
+      transform: translate(-50%, -50%) scale(1.06);
+      filter: brightness(1.08) saturate(1.1);
     }
 
     .menu-btn:active {
-      transform: translate(-50%, -50%) scale(0.95);
+      transform: translate(-50%, -50%) scale(0.94);
     }
-
-    /* ボタン配置 */
-    #start-button { top: 64%; left: 50%; width: 240px; height: 55px; }
-    #score-attack-button {
-      top: 73.5%;
-      left: 50%;
-      width: 200px;
-      height: 42px;
-      transform: translate(-50%, -50%);
+    .menu-btn.no-img {
       border: 1.5px solid #00e5ff;
       background: rgba(0, 30, 50, 0.85);
-      color: #00e5ff;
-      font-size: 13px;
-      font-weight: bold;
-      letter-spacing: 1px;
       border-radius: 22px;
-      cursor: pointer;
+      color: #00e5ff;
       box-shadow: 0 0 14px rgba(0, 229, 255, 0.3);
-      z-index: 11;
+    }
+    .menu-btn.no-img .img-btn-fallback {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ボタン配置（ポップUI・400px幅に収める） */
+    #start-button {
+      top: 58%;
+      left: 50%;
+      width: 340px;
+      height: 88px;
+      z-index: 12;
+      filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.25));
+    }
+    #score-attack-button {
+      top: 70%;
+      left: 50%;
+      width: 280px;
+      height: 58px;
+      transform: translate(-50%, -50%);
+      z-index: 12;
       padding: 0;
+      border: none;
+      background: none;
+      box-shadow: none;
+      filter: drop-shadow(0 4px 10px rgba(0, 100, 180, 0.3));
     }
-    #score-attack-button:hover {
-      background: rgba(0, 50, 80, 0.9);
-      box-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+    #ranking-button { top: 86%; left: 22%; width: 100px; height: 110px; z-index: 12; }
+    #custom-button  { top: 86%; left: 50%; width: 100px; height: 110px; z-index: 12; }
+    #howto-button   { top: 86%; left: 78%; width: 100px; height: 110px; z-index: 12; }
+
+    #ranking-button img,
+    #custom-button img,
+    #howto-button img {
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
     }
-    #score-attack-button:active {
-      transform: translate(-50%, -50%) scale(0.96);
-    }
-    #ranking-button { top: 86%; left: 30%; width: 90px; height: 90px; }
-    #custom-button { top: 86%; left: 50%; width: 90px; height: 90px; }
-    #howto-button { top: 86%; left: 70%; width: 90px; height: 90px; }
 
     /* ===== マップ風ステージ選択 ===== */
     #mode-select-screen,
@@ -268,12 +283,11 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      padding-top: 16px;
+      padding-top: 12px;
       box-sizing: border-box;
       background:
-        radial-gradient(ellipse at 20% 15%, rgba(0, 180, 255, 0.08) 0%, transparent 45%),
-        radial-gradient(ellipse at 80% 80%, rgba(80, 40, 160, 0.12) 0%, transparent 50%),
-        linear-gradient(180deg, #070b16 0%, #0c1224 50%, #0a1020 100%);
+        radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.45) 0%, transparent 50%),
+        linear-gradient(180deg, #6ec8ff 0%, #a8e4ff 35%, #e8f8ff 70%, #fff6d6 100%);
     }
 
     #sub-select-screen {
@@ -288,21 +302,23 @@
     #mode-select-title,
     #sub-select-title {
       color: #fff;
-      font-size: 20px;
+      font-size: 22px;
       font-weight: 900;
-      letter-spacing: 4px;
+      letter-spacing: 3px;
       text-shadow:
-        0 0 12px rgba(0, 229, 255, 0.7),
-        0 0 28px rgba(0, 180, 255, 0.35);
-      margin-bottom: 4px;
+        0 2px 0 rgba(0, 90, 160, 0.35),
+        0 4px 12px rgba(0, 80, 140, 0.25);
+      margin-bottom: 2px;
       flex-shrink: 0;
     }
 
     #mode-select-subtitle {
-      color: rgba(180, 210, 240, 0.5);
-      font-size: 11px;
+      color: #1a5a90;
+      font-size: 12px;
+      font-weight: bold;
       letter-spacing: 1px;
       margin-bottom: 6px;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.6);
     }
 
     /* スコアアタック（マップ上部の別ルート） */
@@ -555,6 +571,12 @@
       box-sizing: border-box;
     }
     .world-nav {
+      background: linear-gradient(180deg, #ffe566, #ffb800) !important;
+      border: 3px solid #1a3a6a !important;
+      color: #1a2a4a !important;
+      box-shadow: 0 3px 0 #c99000, 0 4px 10px rgba(0,0,0,0.15) !important;
+      border-radius: 14px !important;
+      font-weight: 900 !important;
       width: 32px;
       align-self: center;
       height: 40px;
@@ -575,7 +597,26 @@
       flex-direction: column;
       gap: 2px;
     }
-    .world-banner { text-align: center; flex-shrink: 0; }
+    .world-banner {
+      text-align: center;
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.85);
+      border-radius: 16px;
+      border: 3px solid #fff;
+      box-shadow: 0 4px 12px rgba(30, 100, 160, 0.15);
+      padding: 6px 14px;
+      margin-bottom: 4px;
+    }
+    .world-tag {
+      color: #00a0e0 !important;
+      font-weight: 900 !important;
+      text-shadow: none !important;
+    }
+    .world-name {
+      color: #1a2a4a !important;
+      font-weight: 900 !important;
+      text-shadow: none !important;
+    }
     .world-tag {
       display: block;
       font-size: 10px;
@@ -965,12 +1006,13 @@
       margin: 0;
     }
     .world-hint {
-      font-size: 10px;
-      color: rgba(180, 210, 240, 0.5);
+      font-size: 11px;
+      color: #3a6a90;
+      font-weight: bold;
       text-align: center;
       flex-shrink: 0;
       min-height: 0;
-      margin: 0;
+      margin: 2px 0 4px;
       line-height: 1.2;
     }
 
@@ -1016,12 +1058,13 @@
 
     .world-selected {
       text-align: center;
-      font-size: 11px;
-      color: rgba(200, 225, 245, 0.9);
-      font-weight: bold;
+      font-size: 12px;
+      color: #1a5a90;
+      font-weight: 900;
       min-height: 1em;
       flex-shrink: 0;
-      margin: 2px 0 0;
+      margin: 4px 0 0;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.7);
     }
     .world-action {
       display: flex;
@@ -1043,7 +1086,7 @@
       min-width: 56px;
       max-width: 88px;
       padding: 2px 4px;
-      background: url("ui_plate.png") center / 100% 100% no-repeat,
+      background: url("UI/ui_plate.png"), url("ui/ui_plate.png"), url("ui_plate.png") center / 100% 100% no-repeat,
                   linear-gradient(180deg, #f5e6c8, #e0c9a0);
       border: 2px solid #8b6914;
       border-radius: 4px;
@@ -1075,18 +1118,19 @@
       flex-shrink: 0;
     }
     .world-dot {
-      width: 8px;
-      height: 8px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
-      border: none;
+      background: rgba(255, 255, 255, 0.7);
+      border: 2px solid #4db8ff;
       padding: 0;
       cursor: pointer;
     }
     .world-dot.active {
-      background: #00e5ff;
-      box-shadow: 0 0 8px rgba(0, 229, 255, 0.6);
-      transform: scale(1.2);
+      background: #ffb800;
+      border-color: #1a3a6a;
+      box-shadow: 0 2px 6px rgba(255, 180, 0, 0.5);
+      transform: scale(1.25);
     }
 
     /* 互換用（JSが .mode-btn を参照する場合がある） */
@@ -1134,6 +1178,356 @@
     #warp-button:not(.disabled):active {
       transform: scale(0.92);
     }
+
+    /* 夜空エリア：能力選択 */
+    #ability-choice-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 45;
+      background: rgba(110, 190, 255, 0.55);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    #ability-choice-overlay.visible {
+      display: flex;
+    }
+    .ability-panel {
+      width: 100%;
+      max-width: 340px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 4px solid #fff;
+      border-radius: 24px;
+      padding: 18px 14px 16px;
+      box-shadow: 0 10px 28px rgba(30, 90, 150, 0.25);
+    }
+    .ability-title {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 900;
+      color: #1a5a90;
+      letter-spacing: 2px;
+      margin-bottom: 4px;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+    }
+    .ability-sub {
+      text-align: center;
+      font-size: 12px;
+      font-weight: bold;
+      color: #4a7aa0;
+      margin-bottom: 14px;
+    }
+    .ability-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .ability-opt {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 3px;
+      width: 100%;
+      text-align: left;
+      border: 3px solid #1a3a6a;
+      background: linear-gradient(180deg, #f0f9ff 0%, #e0f2ff 100%);
+      color: #1a2a4a;
+      border-radius: 16px;
+      padding: 12px 14px;
+      cursor: pointer;
+      font-family: inherit;
+      box-shadow: 0 4px 0 #8ab8d8, 0 6px 12px rgba(0,0,0,0.1);
+      transition: transform 0.1s, filter 0.15s;
+    }
+    .ability-opt:nth-child(1) {
+      background: linear-gradient(180deg, #e8f8ff 0%, #c8f0ff 100%);
+      box-shadow: 0 4px 0 #40a0d0, 0 6px 12px rgba(0,0,0,0.1);
+    }
+    .ability-opt:nth-child(2) {
+      background: linear-gradient(180deg, #ffe8f2 0%, #ffd0e4 100%);
+      box-shadow: 0 4px 0 #e070a0, 0 6px 12px rgba(0,0,0,0.1);
+    }
+    .ability-opt:nth-child(3) {
+      background: linear-gradient(180deg, #e8fff0 0%, #c8f5d8 100%);
+      box-shadow: 0 4px 0 #40b070, 0 6px 12px rgba(0,0,0,0.1);
+    }
+    .ability-opt:hover, .ability-opt:active {
+      transform: scale(1.03) translateY(-1px);
+      filter: brightness(1.05);
+    }
+    .ability-opt-name {
+      font-size: 15px;
+      font-weight: 900;
+      color: #1a2a4a;
+    }
+    .ability-opt-desc {
+      font-size: 11px;
+      font-weight: bold;
+      color: #4a6a8a;
+    }
+    #freeze-button {
+      position: absolute;
+      right: 12px;
+      bottom: 86px;
+      width: 64px;
+      height: 64px;
+      border: 3px solid #1a3a6a;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #7ee0ff, #00c2ff);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 40;
+      cursor: pointer;
+      padding: 4px;
+      box-shadow: 0 0 12px rgba(80, 180, 255, 0.35);
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 900;
+      line-height: 1.15;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+      box-shadow: 0 4px 0 #0080b0, 0 6px 12px rgba(0,0,0,0.15);
+    }
+    #freeze-button #freeze-count {
+      font-size: 13px;
+      margin-top: 2px;
+      color: #fff;
+    }
+    #freeze-button.disabled {
+      opacity: 0.4;
+      filter: grayscale(0.6);
+    }
+    #freeze-button:not(.disabled):active {
+      transform: scale(0.92);
+    }
+
+    /* 設定パネル（ポップ） */
+    #settings-button {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 14;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 3px solid #1a3a6a;
+      background: linear-gradient(180deg, #ffe566, #ffb800);
+      color: #1a2a4a;
+      font-size: 20px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #c99000, 0 4px 10px rgba(0,0,0,0.15);
+      line-height: 1;
+    }
+    #settings-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 60;
+      background: rgba(100, 180, 240, 0.55);
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    #settings-overlay.visible { display: flex; }
+    .settings-panel {
+      width: 100%;
+      max-width: 340px;
+      background: rgba(255,255,255,0.97);
+      border-radius: 22px;
+      border: 4px solid #fff;
+      box-shadow: 0 10px 28px rgba(30,90,150,0.25);
+      padding: 16px 14px 14px;
+      max-height: 90%;
+      overflow-y: auto;
+      color: #1a2a4a;
+      font-family: inherit;
+    }
+    .settings-panel h2 {
+      margin: 0 0 8px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 900;
+      color: #1a5a90;
+    }
+    .settings-section {
+      background: #f0f9ff;
+      border-radius: 14px;
+      border: 2px solid #d6eeff;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .settings-section h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      font-weight: 900;
+      color: #0080c0;
+    }
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+    .settings-row input[type="range"] { flex: 1; accent-color: #00c2ff; }
+    .stat-line {
+      font-size: 12px;
+      font-weight: bold;
+      color: #2a4a6a;
+      margin: 4px 0;
+      display: flex;
+      justify-content: space-between;
+    }
+    .settings-close {
+      display: block;
+      width: 100%;
+      margin-top: 4px;
+      padding: 12px;
+      border-radius: 999px;
+      border: 3px solid #1a3a6a;
+      background: linear-gradient(180deg, #ffe566, #ffb800);
+      font-weight: 900;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #c99000;
+    }
+
+    /* クリア／ゲームオーバー結果メニュー（ポップ） */
+    #result-menu {
+      display: none;
+      position: absolute;
+      left: 50%;
+      bottom: 28px;
+      transform: translateX(-50%);
+      z-index: 42;
+      width: calc(100% - 32px);
+      max-width: 300px;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: auto;
+    }
+    #result-menu.visible {
+      display: flex;
+    }
+    .result-btn {
+      display: block;
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 999px;
+      border: 3px solid #1a3a6a;
+      font-weight: 900;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: inherit;
+      text-align: center;
+      box-sizing: border-box;
+      transition: transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .result-btn:active { transform: scale(0.96) translateY(1px); }
+    .result-btn.retry {
+      background: linear-gradient(180deg, #7ee0ff, #00c2ff);
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 0 #0080b0, 0 6px 12px rgba(0,0,0,0.12);
+    }
+    .result-btn.next {
+      background: linear-gradient(180deg, #7dffb0, #3ddc84);
+      color: #0a3a20;
+      box-shadow: 0 4px 0 #1a8a50, 0 6px 12px rgba(0,0,0,0.12);
+    }
+    .result-btn.prev {
+      background: linear-gradient(180deg, #ffe566, #ffb800);
+      color: #1a2a4a;
+      box-shadow: 0 4px 0 #c99000, 0 6px 12px rgba(0,0,0,0.12);
+    }
+    .result-btn.title {
+      background: linear-gradient(180deg, #fff, #e8f4ff);
+      color: #1a5a90;
+      box-shadow: 0 4px 0 #8ab8d8, 0 6px 12px rgba(0,0,0,0.1);
+    }
+    .result-btn.hidden { display: none !important; }
+
+    /* アンケートボタン（タイトル左上） */
+    #survey-button {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 14;
+      max-width: calc(50% - 20px);
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 3px solid #1a3a6a;
+      background: linear-gradient(180deg, #fff0f8, #ff9fd0);
+      color: #6a2048;
+      font-size: 11px;
+      font-weight: 900;
+      line-height: 1.25;
+      text-decoration: none;
+      text-align: center;
+      box-shadow: 0 3px 0 #c05080, 0 4px 10px rgba(0,0,0,0.12);
+      cursor: pointer;
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #survey-button:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #c05080, 0 2px 6px rgba(0,0,0,0.12);
+    }
+
+    #survey-nudge {
+      display: none;
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
+      max-width: calc(100% - 24px);
+      background: rgba(255, 255, 255, 0.95);
+      border: 3px solid #1a3a6a;
+      border-radius: 999px;
+      padding: 8px 36px 8px 14px;
+      box-shadow: 0 4px 14px rgba(30, 80, 140, 0.2);
+      align-items: center;
+      gap: 8px;
+    }
+    #survey-nudge.visible {
+      display: flex;
+    }
+    .survey-nudge-link {
+      color: #6a2048;
+      font-size: 12px;
+      font-weight: 900;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .survey-nudge-link:hover { text-decoration: underline; }
+    .survey-nudge-close {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 26px;
+      height: 26px;
+      border: none;
+      border-radius: 50%;
+      background: #eee;
+      color: #333;
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -1151,8 +1545,71 @@
     <div id="fade-overlay"></div>
 
     <button id="warp-button" type="button" aria-label="ワープ">
-      <img src="warp_item.png" alt="warp">
+      <img src="UI/warp_item.png" onerror="if(!this.dataset.a){this.dataset.a=1;this.src=\'ui/warp_item.png\';}else if(!this.dataset.b){this.dataset.b=1;this.src=\'warp_item.png\';}" alt="warp">
       <span id="warp-count">0</span>
+    </button>
+
+
+    <div id="result-menu">
+      <button type="button" class="result-btn retry" data-action="retry">もう一度プレイ</button>
+      <button type="button" class="result-btn next" data-action="next">次のステージへ</button>
+      <button type="button" class="result-btn prev" data-action="prev">前のステージへ</button>
+      <button type="button" class="result-btn title" data-action="title">タイトルに戻る</button>
+    </div>
+
+    <div id="settings-overlay">
+      <div class="settings-panel">
+        <h2>⚙ 設定</h2>
+        <div class="settings-section">
+          <h3>サウンド</h3>
+          <div class="settings-row">
+            <span>効果音</span>
+            <input type="checkbox" id="set-se-enabled" checked>
+          </div>
+          <div class="settings-row">
+            <span>音量</span>
+            <input type="range" id="set-se-volume" min="0" max="100" value="28">
+          </div>
+        </div>
+        <div class="settings-section">
+          <h3>プレイ統計</h3>
+          <div id="stats-box">
+            <div class="stat-line"><span>総プレイ</span><span id="stat-plays">0</span></div>
+            <div class="stat-line"><span>総走行距離</span><span id="stat-dist">0 m</span></div>
+            <div class="stat-line"><span>クリア数</span><span id="stat-clears">0</span></div>
+            <div class="stat-line"><span>ゲームオーバー</span><span id="stat-deaths">0</span></div>
+            <div class="stat-line"><span>ベストスコア</span><span id="stat-best">0 m</span></div>
+            <div class="stat-line"><span>能力使用</span><span id="stat-abil">-</span></div>
+          </div>
+        </div>
+        <button type="button" class="settings-close" id="settings-close">閉じる</button>
+      </div>
+    </div>
+
+    <div id="ability-choice-overlay">
+      <div class="ability-panel">
+        <div class="ability-title">ABILITY SELECT</div>
+        <div class="ability-sub" id="ability-choice-sub">能力を1つ選んでください</div>
+        <div class="ability-options">
+          <button type="button" class="ability-opt" data-ability="warp">
+            <span class="ability-opt-name">🚀 ワープアイテム ×2</span>
+            <span class="ability-opt-desc">ワープを2個入手（最大3まで）</span>
+          </button>
+          <button type="button" class="ability-opt" data-ability="revive">
+            <span class="ability-opt-name">💖 一度復活</span>
+            <span class="ability-opt-desc">次に死んだとき、1回だけその場で復活</span>
+          </button>
+          <button type="button" class="ability-opt" data-ability="freeze">
+            <span class="ability-opt-name">⏸ 動き停止アイテム</span>
+            <span class="ability-opt-desc">使用中、キャラの自動移動を一時停止</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <button id="freeze-button" type="button" aria-label="動き停止">
+      <span>STOP</span>
+      <span id="freeze-count">0</span>
     </button>
 
     <div id="gravity-warning" class="hidden">
@@ -1160,11 +1617,17 @@
     </div>
 
     <div id="start-screen">
-      <button id="start-button" class="menu-btn"><img src="btn-start.png" alt="START"></button>
-      <button id="score-attack-button" class="menu-btn" type="button">⚡ スコアアタック</button>
-      <a href="ranking.html" id="ranking-button" class="menu-btn"><img src="btn-ranking.png" alt="RANKING"></a>
-      <a href="custom.html" id="custom-button" class="menu-btn"><img src="btn-custom.png" alt="CUSTOM"></a>
-      <a href="howto.html" id="howto-button" class="menu-btn"><img src="btn-howto.png" alt="HOW TO"></a>
+      <a id="survey-button" href="https://forms.gle/85uebwU1FUDFM49M9" target="_blank" rel="noopener noreferrer">📝 アンケート回答はこちら</a>
+      <button id="settings-button" type="button" aria-label="設定">⚙</button>
+      <button id="start-button" class="menu-btn"><img src="UI/btn-start.png" onerror="if(!this.dataset.a){this.dataset.a=1;this.src=\'ui/btn-start.png\';}else if(!this.dataset.b){this.dataset.b=1;this.src=\'btn-start.png\';}" alt="START"></button>
+      <button id="score-attack-button" class="menu-btn" type="button">
+        <img src="UI/btn-score-attack.png" onerror="if(!this.dataset.a){this.dataset.a=1;this.src=\'ui/btn-score-attack.png\';}else if(!this.dataset.b){this.dataset.b=1;this.src=\'btn-score-attack.png\';}" alt="スコアアタック"
+             onerror="this.style.display='none';this.parentNode.classList.add('no-img');">
+        <span class="img-btn-fallback" style="display:none;color:#00e5ff;font-weight:bold;font-size:13px;letter-spacing:1px;">スコアアタック</span>
+      </button>
+      <a href="ranking.html" id="ranking-button" class="menu-btn"><img src="UI/btn-ranking.png" onerror="if(!this.dataset.a){this.dataset.a=1;this.src=\'ui/btn-ranking.png\';}else if(!this.dataset.b){this.dataset.b=1;this.src=\'btn-ranking.png\';}" alt="RANKING"></a>
+      <a href="custom.html" id="custom-button" class="menu-btn"><img src="UI/btn-custom.png" onerror="if(!this.dataset.a){this.dataset.a=1;this.src=\'ui/btn-custom.png\';}else if(!this.dataset.b){this.dataset.b=1;this.src=\'btn-custom.png\';}" alt="CUSTOM"></a>
+      <a href="howto.html" id="howto-button" class="menu-btn"><img src="UI/btn-howto.png" onerror="if(!this.dataset.a){this.dataset.a=1;this.src=\'ui/btn-howto.png\';}else if(!this.dataset.b){this.dataset.b=1;this.src=\'btn-howto.png\';}" alt="HOW TO"></a>
     </div>
 
     <!-- モード選択画面（ワールドページ式マップ） -->
@@ -1217,11 +1680,11 @@
 
           <div class="world-action">
             <button class="img-btn challenge-btn" id="challenge-btn" type="button" disabled aria-label="決定">
-              <img src="ui_btn_confirm.png" alt="決定">
+              <img src="UI/ui_btn_confirm.png" onerror="if(!this.dataset.a){this.dataset.a=1;this.src=\'ui/ui_btn_confirm.png\';}else if(!this.dataset.b){this.dataset.b=1;this.src=\'ui_btn_confirm.png\';}" alt="決定">
               <span class="img-btn-fallback">決定</span>
             </button>
             <button class="img-btn mode-back-img" id="mode-back-btn" type="button" aria-label="戻る">
-              <img src="ui_btn_back.png" alt="戻る">
+              <img src="UI/ui_btn_back.png" onerror="if(!this.dataset.a){this.dataset.a=1;this.src=\'ui/ui_btn_back.png\';}else if(!this.dataset.b){this.dataset.b=1;this.src=\'ui_btn_back.png\';}" alt="戻る">
               <span class="img-btn-fallback">戻る</span>
             </button>
           </div>
@@ -1235,7 +1698,7 @@
 
   </div>
 
-  <audio id="index-sfx-button" src="sfx_button.mp3" preload="auto"></audio>
+  <audio id="index-sfx-button" src="sound/sfx_button.mp3" onerror="this.onerror=null;this.src='sfx_button.mp3'" preload="auto"></audio>
 
 <script>
     function adjustScale() {

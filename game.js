@@ -18,40 +18,95 @@ const normalGravityY = 0.7;
 engine.world.gravity.y = normalGravityY;
 
 // --- 画像の読み込み ---
+
+
+// 素材パス：map / skin / UI / sound フォルダ、またはルート直下でも動く
+function assetDirCandidates(name) {
+  const n = String(name || "").replace(/^\.?\//, "");
+  const lower = n.toLowerCase();
+  let dirs;
+  if (/^player\d*\.png$/.test(lower)) {
+    dirs = ["skin/", "", "assets/"];
+  } else if (/\.(mp3|wav|ogg)$/.test(lower)) {
+    dirs = ["sound/", "", "assets/"];
+  } else if (
+    /^(btn-|ui_|start-bg|warp_item|ring\.|spike|normal_ring)/.test(lower) ||
+    lower === "ring.png" || lower === "spike.png" || lower === "normal_ring.png" ||
+    lower === "warp_item.png" || lower === "start-bg.png"
+  ) {
+    dirs = ["UI/", "ui/", "", "assets/"];
+  } else if (
+    /^(map_|landmark_|tree|sougen|yuugure|yozora|syber|volcano|ground)/.test(lower)
+  ) {
+    dirs = ["map/", "", "assets/"];
+  } else {
+    dirs = ["", "map/", "UI/", "ui/", "skin/", "sound/", "assets/"];
+  }
+  return dirs.map((d) => d + n);
+}
+function loadAssetImage(img, name) {
+  const list = assetDirCandidates(name);
+  let i = 0;
+  const tryNext = () => {
+    if (i >= list.length) return;
+    const url = list[i++];
+    img.onload = null;
+    img.onerror = function () { tryNext(); };
+    img.src = url;
+  };
+  tryNext();
+}
+function loadAssetAudio(audio, name) {
+  const list = assetDirCandidates(name);
+  let i = 0;
+  const tryNext = () => {
+    if (i >= list.length) return;
+    const url = list[i++];
+    const onErr = function () {
+      audio.removeEventListener("error", onErr);
+      tryNext();
+    };
+    audio.addEventListener("error", onErr);
+    audio.src = url;
+  };
+  tryNext();
+}
+
+
 const groundImage = new Image();
-groundImage.src = "ground.jpg";
+loadAssetImage(groundImage, "ground.jpg");
 
 const bgAozora = new Image();
-bgAozora.src = "sougen.png";
+loadAssetImage(bgAozora, "sougen.png");
 
 const bgYuugure = new Image();
-bgYuugure.src = "yuugure.jpeg";
+loadAssetImage(bgYuugure, "yuugure.jpeg");
 
 const bgYozora = new Image();
-bgYozora.src = "yozora.png";
+loadAssetImage(bgYozora, "yozora.png");
 
 const bgCyber = new Image();
-bgCyber.src = "syber.jpg";
+loadAssetImage(bgCyber, "syber.jpg");
 
 const bgVolcano = new Image();
-bgVolcano.src = "volcano.png";
+loadAssetImage(bgVolcano, "volcano.png");
 
 const spikeImage = new Image();
-spikeImage.src = "spike.png";
+loadAssetImage(spikeImage, "spike.png");
 
 const ringImage = new Image();
-ringImage.src = "ring.png";
+loadAssetImage(ringImage, "ring.png");
 
 const normalRingImage = new Image();
-normalRingImage.src = "normal_ring.png";
+loadAssetImage(normalRingImage, "normal_ring.png");
 
 const warpItemImage = new Image();
-warpItemImage.src = "warp_item.png";
+loadAssetImage(warpItemImage, "warp_item.png");
 
 // --- 音声ファイルの読み込みと音量設定 ---
-const deathSound = new Audio("death.mp3");
+const deathSound = (function(){ const a = new Audio(); loadAssetAudio(a, "death.mp3"); return a; })();
 deathSound.volume = 0.03;
-const playBGM = new Audio("play.mp3");
+const playBGM = (function(){ const a = new Audio(); loadAssetAudio(a, "play.mp3"); return a; })();
 playBGM.loop = true; 
 playBGM.volume = 0.03;
 
@@ -63,13 +118,16 @@ const SFX_BASE_VOLUME = {
   button: 0.28
 };
 
-const sfxCountdown = new Audio("sfx_countdown.mp3");
+const sfxCountdown = new Audio();
+loadAssetAudio(sfxCountdown, "sfx_countdown.mp3");
 sfxCountdown.preload = "auto";
 
-const sfxClear = new Audio("sfx_clear.mp3");
+const sfxClear = new Audio();
+loadAssetAudio(sfxClear, "sfx_clear.mp3");
 sfxClear.preload = "auto";
 
-const sfxButton = new Audio("sfx_button.mp3");
+const sfxButton = new Audio();
+loadAssetAudio(sfxButton, "sfx_button.mp3");
 sfxButton.preload = "auto";
 
 // ===== 効果音設定（ページを移動・ゲームオーバーしても維持） =====
@@ -199,7 +257,7 @@ function isCharacterUnlocked(index) {
 
 const playerImages = characterList.map((char) => {
   const img = new Image();
-  img.src = char.src;
+  loadAssetImage(img, char.src);
   return img;
 });
 
@@ -536,7 +594,53 @@ const MODE_CONFIG = {
     warpItemEnabled: true, warpItemChance: 0.35,
     blinkPlatformEnabled: true, blinkPlatformChance: 0.34,
     windEnabled: true, windStartScore: 10
+  },
+  "stage7-1": {
+    name: "STAGE 7-1", mainStage: 7, subStage: 1, isInfinite: false,
+    targetScore: 160,
+    holeChance: 0.45, minHoleWidth: 190, maxHoleWidthFactor: 0.72,
+    wallHeightMin: 100, wallHeightMax: 260, minSafeDistance: 320,
+    baseSpeed: 4.3, airborneGravityStart: 100, gravityIncrease: 0.16,
+    bgFixed: "ice",
+    laserEnabled: true, laserStartScore: 40,
+    laserCooldownMin: 180, laserCooldownMax: 280,
+    ringEnabled: true, ringChance: 0.14, normalRingChance: 0.10,
+    spikeEnabled: true, spikeStartScore: 40,
+    gravityReverseEnabled: false,
+    warpItemEnabled: true, warpItemChance: 0.30,
+    iceSlip: true
+  },
+  "stage7-2": {
+    name: "STAGE 7-2", mainStage: 7, subStage: 2, isInfinite: false,
+    targetScore: 190,
+    holeChance: 0.50, minHoleWidth: 200, maxHoleWidthFactor: 0.78,
+    wallHeightMin: 110, wallHeightMax: 290, minSafeDistance: 300,
+    baseSpeed: 4.45, airborneGravityStart: 95, gravityIncrease: 0.17,
+    bgFixed: "ice",
+    laserEnabled: true, laserStartScore: 30,
+    laserCooldownMin: 160, laserCooldownMax: 260,
+    ringEnabled: true, ringChance: 0.15, normalRingChance: 0.11,
+    spikeEnabled: true, spikeStartScore: 30,
+    gravityReverseEnabled: true, gravityReverseStartScore: 50,
+    warpItemEnabled: true, warpItemChance: 0.32,
+    iceSlip: true
+  },
+  "stage7-3": {
+    name: "STAGE 7-3", mainStage: 7, subStage: 3, isInfinite: false,
+    targetScore: 220,
+    holeChance: 0.55, minHoleWidth: 210, maxHoleWidthFactor: 0.82,
+    wallHeightMin: 120, wallHeightMax: 320, minSafeDistance: 280,
+    baseSpeed: 4.6, airborneGravityStart: 90, gravityIncrease: 0.18,
+    bgFixed: "ice",
+    laserEnabled: true, laserStartScore: 20,
+    laserCooldownMin: 140, laserCooldownMax: 240,
+    ringEnabled: true, ringChance: 0.16, normalRingChance: 0.12,
+    spikeEnabled: true, spikeStartScore: 20,
+    gravityReverseEnabled: true, gravityReverseStartScore: 35,
+    warpItemEnabled: true, warpItemChance: 0.34,
+    iceSlip: true, windEnabled: true, windStartScore: 40
   }
+
 };
 
 let currentMode = null;          
@@ -876,6 +980,42 @@ function drawGoal() {
   ctx.restore();
 }
 
+
+// ===== プレイ統計（ローカル） =====
+function loadPlayStats() {
+  try {
+    const s = JSON.parse(localStorage.getItem("drawRunPlayStats"));
+    if (s && typeof s === "object") {
+      return {
+        totalDistance: Number(s.totalDistance) || 0,
+        clears: Number(s.clears) || 0,
+        deaths: Number(s.deaths) || 0,
+        playCount: Number(s.playCount) || 0,
+        abilities: s.abilities || { warp: 0, revive: 0, freeze: 0 },
+        bestScore: Number(s.bestScore) || 0
+      };
+    }
+  } catch (e) {}
+  return { totalDistance: 0, clears: 0, deaths: 0, playCount: 0, abilities: { warp: 0, revive: 0, freeze: 0 }, bestScore: 0 };
+}
+function savePlayStats(s) {
+  try { localStorage.setItem("drawRunPlayStats", JSON.stringify(s)); } catch (e) {}
+}
+function recordStat(type, value) {
+  const s = loadPlayStats();
+  if (type === "distance") s.totalDistance += Math.max(0, Number(value) || 0);
+  else if (type === "clear") s.clears += 1;
+  else if (type === "death") s.deaths += 1;
+  else if (type === "play") s.playCount += 1;
+  else if (type === "ability") {
+    if (!s.abilities) s.abilities = { warp: 0, revive: 0, freeze: 0 };
+    s.abilities[value] = (s.abilities[value] || 0) + 1;
+  } else if (type === "best") {
+    if (Number(value) > s.bestScore) s.bestScore = Number(value);
+  }
+  savePlayStats(s);
+}
+
 function saveScore(newScore) {
   if (currentMode !== "score") return;
 
@@ -913,6 +1053,19 @@ const warpPickups = [];
 const fakeFloors = []; 
 const blinkPlatforms = []; 
 let warpCount = 0;
+let reviveCharges = 0;      // 一度復活
+let freezeItemCount = 0;    // 動き停止アイテム所持
+let freezeFrames = 0;       // 停止中の残りフレーム
+let freezeHoldX = 0;
+let freezeHoldY = 0;
+const FREEZE_DURATION_FRAMES = 120; // 約2秒
+let abilityChoiceOpen = false;
+let abilityChoiceTriggeredStart = false;
+let abilityMilestonesDone = {};
+let isReviving = false;
+let reviveHoldX = 200;
+let isCountingDown = false;
+let countdownTimerId = null;
 
 let windState = "idle"; 
 let windTimer = 0;
@@ -976,6 +1129,14 @@ function resetWorldForMode() {
   blinkPlatforms.forEach(bp => { if (bp.body) World.remove(world, bp.body); });
   blinkPlatforms.length = 0;
   warpCount = 0;
+  reviveCharges = 0;
+  freezeItemCount = 0;
+  freezeFrames = 0;
+  abilityChoiceOpen = false;
+  abilityChoiceTriggeredStart = false;
+  abilityMilestonesDone = {};
+  isReviving = false;
+  isCountingDown = false;
   windState = "idle";
   windTimer = 0;
   lineBoostFrames = 0;
@@ -1323,20 +1484,146 @@ function moveDrawing(clientX, clientY) {
   lastPoint = currentPoint;
 }
 
-function handleScreenClick(clientX, clientY) {
-  const pt = getCanvasPoint(clientX, clientY);
 
-  if (gameOver || gameCleared) {
-    const btnX = canvas.width / 2 - 110;
-    const btnY = canvas.height / 2 + 70;
-    const btnW = 220;
-    const btnH = 50;
+function getStageDifficultyStars(modeKey) {
+  const c = MODE_CONFIG[modeKey];
+  if (!c) return 1;
+  if (modeKey === "score") return 5;
+  // 1〜5
+  const v = (c.mainStage - 1) + Math.ceil(c.subStage * 0.7);
+  return Math.max(1, Math.min(5, v));
+}
+function getNextStageKey(modeKey) {
+  const idx = STAGE_ORDER.indexOf(modeKey);
+  if (idx < 0 || idx >= STAGE_ORDER.length - 1) return null;
+  return STAGE_ORDER[idx + 1];
+}
+function getPrevStageKey(modeKey) {
+  const idx = STAGE_ORDER.indexOf(modeKey);
+  if (idx <= 0) return null;
+  return STAGE_ORDER[idx - 1];
+}
+function goToStageKey(modeKey) {
+  if (!modeKey || !MODE_CONFIG[modeKey]) return;
+  if (typeof isStageUnlocked === "function" && !isStageUnlocked(modeKey)) return;
+  currentMode = modeKey;
+  currentConfig = MODE_CONFIG[modeKey];
+  gameOver = false;
+  gameCleared = false;
+  isReviving = false;
+  abilityChoiceOpen = false;
+  freezeFrames = 0;
+  gameStarted = false;
+  hideCountdownUI();
+  clearFadeOverlay();
+  startCountdownAndGame();
+}
 
-    if (pt.x >= btnX && pt.x <= btnX + btnW && pt.y >= btnY && pt.y <= btnY + btnH) {
-      playBGM.pause(); 
-      location.reload(); 
-    }
+
+
+const SURVEY_URL = "https://forms.gle/85uebwU1FUDFM49M9";
+function showSurveyNudge() {
+  let el = document.getElementById("survey-nudge");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "survey-nudge";
+    el.innerHTML = '<a class="survey-nudge-link" href="' + SURVEY_URL + '" target="_blank" rel="noopener noreferrer">📝 アンケート回答はこちら</a>' +
+      '<button type="button" class="survey-nudge-close" aria-label="閉じる">×</button>';
+    const container = document.getElementById("game-container") || document.body;
+    container.appendChild(el);
+    el.querySelector(".survey-nudge-close").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      el.classList.remove("visible");
+    });
   }
+  el.classList.add("visible");
+}
+function hideSurveyNudge() {
+  const el = document.getElementById("survey-nudge");
+  if (el) el.classList.remove("visible");
+}
+
+function hideResultMenu() {
+  const menu = document.getElementById("result-menu");
+  if (menu) menu.classList.remove("visible");
+}
+function showResultMenu() {
+  const menu = document.getElementById("result-menu");
+  if (!menu) return;
+  const nextBtn = menu.querySelector('[data-action="next"]');
+  const prevBtn = menu.querySelector('[data-action="prev"]');
+  const isStage = currentMode && currentMode.startsWith("stage");
+  if (nextBtn) {
+    const nextKey = isStage ? getNextStageKey(currentMode) : null;
+    const show = !!(nextKey && isStageUnlocked(nextKey));
+    nextBtn.classList.toggle("hidden", !show);
+  }
+  if (prevBtn) {
+    const prevKey = isStage ? getPrevStageKey(currentMode) : null;
+    prevBtn.classList.toggle("hidden", !prevKey);
+  }
+  menu.classList.add("visible");
+}
+function initResultMenuUI() {
+  const menu = document.getElementById("result-menu");
+  if (!menu || menu.dataset.bound) return;
+  menu.dataset.bound = "1";
+  menu.addEventListener("click", (e) => {
+    const btn = e.target.closest(".result-btn");
+    if (!btn) return;
+    const action = btn.getAttribute("data-action");
+    try { playButtonSfx(); } catch (err) {}
+    if (action === "retry") {
+      hideResultMenu();
+      restartSameStage();
+    } else if (action === "next") {
+      const nextKey = getNextStageKey(currentMode);
+      if (nextKey) {
+        hideResultMenu();
+        goToStageKey(nextKey);
+      }
+    } else if (action === "prev") {
+      const prevKey = getPrevStageKey(currentMode);
+      if (prevKey) {
+        hideResultMenu();
+        goToStageKey(prevKey);
+      }
+    } else if (action === "title") {
+      try { playBGM.pause(); } catch (err) {}
+      location.reload();
+    }
+  });
+}
+
+function restartSameStage() {
+  hideResultMenu();
+  hideSurveyNudge();
+  try { playBGM.pause(); } catch (e) {}
+  if (countdownTimerId) {
+    clearInterval(countdownTimerId);
+    countdownTimerId = null;
+  }
+  gameOver = false;
+  gameCleared = false;
+  isReviving = false;
+  abilityChoiceOpen = false;
+  isCountingDown = false;
+  freezeFrames = 0;
+  gameStarted = false;
+  hideCountdownUI();
+  clearFadeOverlay();
+  // currentMode / currentConfig はそのまま
+  if (!currentConfig) {
+    location.reload();
+    return;
+  }
+  startCountdownAndGame();
+}
+
+function handleScreenClick(clientX, clientY) {
+  // 結果メニューは HTML ボタンで処理
+  if (gameOver || gameCleared) return true;
   return false;
 }
 
@@ -1445,11 +1732,196 @@ Matter.Events.on(engine, "collisionActive", (event) => {
   isTouchingLine = touchingLine;
 });
 
+
+
+// ===== クリア／失敗演出 =====
+let resultFx = [];
+function spawnResultFx(isClear) {
+  resultFx = [];
+  const colors = isClear
+    ? ["#33ff99", "#ffe566", "#7ee0ff", "#ffffff", "#ff9fd0"]
+    : ["#ff5555", "#ff8844", "#aaaaaa", "#ff3333"];
+  for (let i = 0; i < 48; i++) {
+    const ang = Math.random() * Math.PI * 2;
+    const sp = 2 + Math.random() * 6;
+    resultFx.push({
+      x: canvas.width / 2,
+      y: canvas.height / 2 - 20,
+      vx: Math.cos(ang) * sp,
+      vy: Math.sin(ang) * sp - 2,
+      life: 50 + Math.floor(Math.random() * 30),
+      color: colors[i % colors.length],
+      size: 3 + Math.random() * 5
+    });
+  }
+}
+function updateAndDrawResultFx() {
+  if (!resultFx.length) return;
+  for (let i = resultFx.length - 1; i >= 0; i--) {
+    const p = resultFx[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.12;
+    p.life--;
+    if (p.life <= 0) {
+      resultFx.splice(i, 1);
+      continue;
+    }
+    ctx.globalAlpha = Math.min(1, p.life / 30);
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+function isNightSkyStage() {
+  return currentConfig && currentConfig.mainStage === 3;
+}
+function canUseAbilityChoice() {
+  if (!currentConfig) return false;
+  if (currentMode === "score") return true;
+  return currentConfig.mainStage >= 3;
+}
+
+function updateFreezeButtonUI() {
+  const btn = document.getElementById("freeze-button");
+  const countEl = document.getElementById("freeze-count");
+  if (countEl) countEl.textContent = String(freezeItemCount);
+  if (btn) {
+    btn.classList.toggle("disabled", freezeItemCount <= 0 && freezeFrames <= 0);
+    const show = gameStarted && !gameOver && !gameCleared && !abilityChoiceOpen;
+    btn.style.display = show && (freezeItemCount > 0 || freezeFrames > 0 || canUseAbilityChoice()) ? "flex" : "none";
+    if (freezeFrames > 0) {
+      btn.style.borderColor = "rgba(80, 255, 180, 0.95)";
+      btn.style.boxShadow = "0 0 16px rgba(80, 255, 180, 0.55)";
+    } else {
+      btn.style.borderColor = "rgba(100, 200, 255, 0.8)";
+      btn.style.boxShadow = "0 0 12px rgba(80, 180, 255, 0.35)";
+    }
+  }
+}
+
+function useFreezeItem() {
+  if (!gameStarted || gameOver || gameCleared || abilityChoiceOpen || isReviving) return;
+  if (freezeFrames > 0) return;
+  if (freezeItemCount <= 0) return;
+  freezeItemCount--;
+  freezeFrames = FREEZE_DURATION_FRAMES;
+  freezeHoldX = player.position.x;
+  freezeHoldY = player.position.y;
+  try {
+    Body.setVelocity(player, { x: 0, y: 0 });
+  } catch (e) {}
+  updateFreezeButtonUI();
+  try { playButtonSfx(); } catch (e) {}
+}
+
+function applyAbilityChoice(kind) {
+  if (kind === "warp") {
+    warpCount = Math.min(WARP_MAX, warpCount + 2);
+    updateWarpButtonUI();
+  } else if (kind === "revive") {
+    reviveCharges += 1;
+  } else if (kind === "freeze") {
+    freezeItemCount += 1;
+    updateFreezeButtonUI();
+  }
+  try { recordStat("ability", kind); } catch (e) {}
+}
+
+function closeAbilityChoice() {
+  abilityChoiceOpen = false;
+  const overlay = document.getElementById("ability-choice-overlay");
+  if (overlay) overlay.classList.remove("visible");
+  updateWarpButtonUI();
+  updateFreezeButtonUI();
+}
+
+function openAbilityChoice(reason) {
+  if (!canUseAbilityChoice() || gameOver || gameCleared) return;
+  if (abilityChoiceOpen) return;
+  abilityChoiceOpen = true;
+  try { releaseLines(); } catch (e) {}
+  const overlay = document.getElementById("ability-choice-overlay");
+  const sub = document.getElementById("ability-choice-sub");
+  if (sub) {
+    if (reason === "start") sub.textContent = "スタート！ 能力を1つ選んでください";
+    else if (typeof reason === "number") sub.textContent = reason + "m到達！ 能力を1つ選んでください";
+    else sub.textContent = "能力を1つ選んでください";
+  }
+  if (overlay) overlay.classList.add("visible");
+  updateWarpButtonUI();
+  updateFreezeButtonUI();
+}
+
+function checkAbilityChoiceTriggers() {
+  if (!canUseAbilityChoice() || gameOver || gameCleared || abilityChoiceOpen) return;
+  if (!gameStarted || isCountingDown || isReviving) return;
+
+  // 開始直後
+  if (!abilityChoiceTriggeredStart && score <= 2) {
+    abilityChoiceTriggeredStart = true;
+    abilityMilestonesDone[0] = true;
+    openAbilityChoice("start");
+    return;
+  }
+  // 100mごと
+  if (score >= 100) {
+    const mile = Math.floor(score / 100) * 100;
+    if (mile >= 100 && !abilityMilestonesDone[mile]) {
+      abilityMilestonesDone[mile] = true;
+      openAbilityChoice(mile);
+    }
+  }
+}
+
+function initAbilityChoiceUI() {
+  const overlay = document.getElementById("ability-choice-overlay");
+  if (overlay && !overlay.dataset.bound) {
+    overlay.dataset.bound = "1";
+    overlay.addEventListener("click", (e) => {
+      const btn = e.target.closest(".ability-opt");
+      if (!btn || !abilityChoiceOpen) return;
+      const kind = btn.getAttribute("data-ability");
+      if (!kind) return;
+      try { playButtonSfx(); } catch (err) {}
+      applyAbilityChoice(kind);
+      closeAbilityChoice();
+    });
+  }
+  const freezeBtn = document.getElementById("freeze-button");
+  if (freezeBtn && !freezeBtn.dataset.bound) {
+    freezeBtn.dataset.bound = "1";
+    const handler = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      useFreezeItem();
+    };
+    freezeBtn.addEventListener("click", handler);
+    freezeBtn.addEventListener("touchstart", handler, { passive: false });
+  }
+}
+
 function triggerGameOver() {
   if (gameOver || gameCleared) return;
+  if (freezeFrames > 0) return; // 時間停止中は無敵
   if (window.DRAW_RUN && window.DRAW_RUN.invincible) return;
+  // 一度復活
+  if (reviveCharges > 0) {
+    reviveCharges--;
+    try { playDeathSfx(); } catch (e) {}
+    startReviveSequence();
+    return;
+  }
   gameOver = true;
   saveScore(score);
+  try {
+    recordStat("death");
+    spawnResultFx(false);
+  } catch (e) {}
+  try { showResultMenu(); } catch (e) {}
 
   playBGM.pause();
   playDeathSfx();
@@ -1461,6 +1933,16 @@ function triggerGameClear() {
 
   if (currentMode && currentMode.startsWith("stage")) {
     saveStageClear(currentMode);
+  }
+  try {
+    recordStat("clear");
+    recordStat("distance", score);
+    spawnResultFx(true);
+  } catch (e) {}
+  try { showResultMenu(); } catch (e) {}
+  // ステージクリア時：邪魔にならないアンケート案内
+  if (currentMode && currentMode.startsWith("stage")) {
+    try { showSurveyNudge(); } catch (e) {}
   }
 
   playBGM.pause();
@@ -1859,8 +2341,9 @@ function updateWarpButtonUI() {
   if (countEl) countEl.textContent = String(warpCount);
   if (btn) {
     btn.classList.toggle("disabled", warpCount <= 0);
-    btn.style.display = gameStarted && !gameOver && !gameCleared ? "flex" : "none";
+    btn.style.display = gameStarted && !gameOver && !gameCleared && !abilityChoiceOpen ? "flex" : "none";
   }
+  updateFreezeButtonUI();
 }
 
 function drawWarpPickups() {
@@ -2143,16 +2626,63 @@ function drawWindGimmick() {
 
 function fixedUpdate() {
   if (gameOver || gameCleared) return;
+  if (abilityChoiceOpen || isReviving || isCountingDown) {
+    // 選択中・復活/開始カウント中は完全停止（裏で進行しない）
+    try { Body.setVelocity(player, { x: 0, y: 0 }); } catch (e) {}
+    return;
+  }
 
   const baseGrav = normalGravityY;
   const cfg = currentConfig;
+  if (!cfg) return;
+
+  // 時間停止：プレイヤーはその場固定＋無敵、障害物・ギミックは動かす
+  if (freezeFrames > 0) {
+    freezeFrames--;
+    try {
+      Body.setPosition(player, { x: freezeHoldX, y: freezeHoldY });
+      Body.setVelocity(player, { x: 0, y: 0 });
+      Body.setAngle(player, 0);
+    } catch (e) {}
+    cameraX = freezeHoldX - canvas.width * 0.1;
+    stoppedTime = 0;
+    airborneFrames = 0;
+    upperZoneFrames = 0;
+    engine.world.gravity.y = normalGravityY;
+
+    // ギミックは通常通り進行
+    updateLaserGimmick();
+    updateGravityReverseGimmick();
+    updateSpikeGimmick();
+    updateGroundSpikeGimmick();
+    updateRings();
+    updateWarpPickups();
+    updateBlinkPlatforms();
+    updateWindGimmick();
+
+    Engine.update(engine, FIXED_DT_MS);
+
+    // 物理後もプレイヤーを固定（無敵は triggerGameOver 側）
+    try {
+      Body.setPosition(player, { x: freezeHoldX, y: freezeHoldY });
+      Body.setVelocity(player, { x: 0, y: 0 });
+      Body.setAngle(player, 0);
+    } catch (e) {}
+    updateFreezeButtonUI();
+    return;
+  }
 
   let speedMul = 1;
   if (isTouchingBoostLine) speedMul = 1.65;
   else if (isTouchingLine) speedMul = 1.2;
   const debugSpeed = (window.DRAW_RUN && window.DRAW_RUN.speedMul != null) ? window.DRAW_RUN.speedMul : 1;
   playerSpeed = cfg.baseSpeed * speedMul * debugSpeed;
-  Body.setVelocity(player, { x: playerSpeed, y: player.velocity.y });
+  let vyOut = player.velocity.y;
+  // 氷ステージ：接地中は横滑り（制御しにくい）
+  if (cfg.iceSlip && isTouchingGroundOrLine && !isTouchingLine) {
+    vyOut = player.velocity.y * 0.98;
+  }
+  Body.setVelocity(player, { x: playerSpeed, y: vyOut });
 
   // 通常重力中だけ上半分に長時間いる判定を行う。
   // 重力反転中は上側が通常の「床」になるため、この判定を無効化する。
@@ -2200,6 +2730,8 @@ function fixedUpdate() {
   cameraX = player.position.x - canvas.width * 0.1;
   score = Math.max(0, Math.floor((player.position.x - 200) / 100));
 
+  checkAbilityChoiceTriggers();
+
   if (!cfg.isInfinite && score >= cfg.targetScore) {
     triggerGameClear();
   }
@@ -2240,7 +2772,9 @@ function fixedUpdate() {
     triggerGameOver();
   }
 
-  if (Math.abs(player.velocity.x) < 0.5) {
+  if (freezeFrames > 0 || abilityChoiceOpen || isReviving) {
+    stoppedTime = 0;
+  } else if (Math.abs(player.velocity.x) < 0.5) {
     stoppedTime += FIXED_DT_SEC;
   } else {
     stoppedTime = 0;
@@ -2295,6 +2829,22 @@ function gameLoop(now) {
     ctx.fillStyle = "#ff4400";
     ctx.fillRect(0, canvas.height * 0.7, canvas.width, canvas.height * 0.3);
     ctx.globalAlpha = 1;
+  } else if (gameStarted && currentConfig && currentConfig.bgFixed === "ice") {
+    const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    g.addColorStop(0, "#d8f0ff");
+    g.addColorStop(0.4, "#b8e0f8");
+    g.addColorStop(0.75, "#e8f6ff");
+    g.addColorStop(1, "#f5fcff");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "rgba(255,255,255,0.7)";
+    for (let i = 0; i < 30; i++) {
+      const sx = ((i * 73 + cameraX * 0.2) % canvas.width + canvas.width) % canvas.width;
+      const sy = (i * 41 + Date.now() / 40) % canvas.height;
+      ctx.beginPath();
+      ctx.arc(sx, sy, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
   } else if (gameStarted && activeBg && activeBg.procedural === "void") {
     const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
     g.addColorStop(0, "#020208");
@@ -2404,32 +2954,26 @@ function gameLoop(now) {
       ctx.fillText(`SCORE : ${score}m`, canvas.width / 2, canvas.height / 2 + 25);
     }
 
-    const btnX = canvas.width / 2 - 110;
-    const btnY = canvas.height / 2 + 70;
-    const btnW = 220;
-    const btnH = 50;
+    // ボタンは HTML #result-menu（ポップUI）
 
-    ctx.fillStyle = "#222222";
-    ctx.fillRect(btnX, btnY, btnW, btnH);
-    ctx.strokeStyle = gameCleared ? "#33ff99" : "#ff3333";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(btnX, btnY, btnW, btnH);
-
-    ctx.font = "bold 18px 'Helvetica Neue', Arial, sans-serif";
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText("タイトルに戻る", canvas.width / 2, btnY + btnH / 2);
+    // 演出パーティクル
+    updateAndDrawResultFx();
 
     ctx.restore();
     ctx.textAlign = "left";
+  } else if (resultFx.length) {
+    updateAndDrawResultFx();
   }
 
   ctx.save();
 
-  ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+  const hudH = 68;
+  ctx.fillStyle = "rgba(0, 0, 0, 0.45)";
   ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
   ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.roundRect(20, 20, 160, 45, 8);
+  if (typeof ctx.roundRect === "function") ctx.roundRect(20, 16, 160, hudH, 8);
+  else ctx.rect(20, 16, 160, hudH);
   ctx.fill();
   ctx.stroke();
 
@@ -2437,13 +2981,27 @@ function gameLoop(now) {
   ctx.fillStyle = "#ffffff";
   ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
   ctx.shadowBlur = 4;
-  ctx.fillText(`${score} m`, 35, 50);
+  ctx.fillText(`${score} m`, 35, 44);
 
   if (currentConfig && !currentConfig.isInfinite) {
     ctx.font = "bold 13px 'Helvetica Neue', Arial, sans-serif";
     ctx.fillStyle = "#aaaaaa";
-    ctx.fillText(`/ ${currentConfig.targetScore}m`, 110, 50);
+    ctx.fillText(`/ ${currentConfig.targetScore}m`, 110, 44);
   }
+
+  // 残りライフ（復活回数）
+  ctx.shadowBlur = 0;
+  ctx.font = "bold 14px 'Helvetica Neue', Arial, sans-serif";
+  ctx.fillStyle = "#ff6b8a";
+  const lives = Math.max(0, Number(reviveCharges) || 0);
+  let lifeStr = "ライフ ";
+  if (lives <= 0) {
+    lifeStr += "なし";
+    ctx.fillStyle = "rgba(255, 150, 170, 0.55)";
+  } else {
+    for (let i = 0; i < lives; i++) lifeStr += "♥";
+  }
+  ctx.fillText(lifeStr, 35, 68);
 
   const gaugeX = 200;
   const gaugeY = 20;
@@ -2495,21 +3053,52 @@ function gameLoop(now) {
   requestAnimationFrame(gameLoop);
 }
 
-function startCountdownAndGame() {
+function clearFadeOverlay() {
+  const fade = document.getElementById("fade-overlay");
+  if (!fade) return;
+  fade.classList.remove("circle-expand", "fade-in");
+  fade.style.clipPath = "circle(0% at 50% 50%)";
+}
+
+function hideCountdownUI() {
+  const countdownDisplay = document.getElementById("countdown-display");
+  const countdownOverlay = document.getElementById("countdown-overlay");
+  const countdownRing = document.getElementById("countdown-ring");
+  if (countdownDisplay) countdownDisplay.classList.remove("visible");
+  if (countdownOverlay) {
+    countdownOverlay.classList.remove("visible");
+    countdownOverlay.style.display = "none";
+    countdownOverlay.style.opacity = "0";
+    countdownOverlay.style.background = "";
+  }
+  if (countdownRing) countdownRing.classList.remove("visible");
+}
+
+/** 3→2→1→GO を確実に表示してから onComplete */
+function runNumberCountdown(options) {
+  const opts = options || {};
+  const onComplete = typeof opts.onComplete === "function" ? opts.onComplete : function () {};
+  const subForGo = opts.goSub || "GO!";
+  const tips = opts.tips || { 3: "READY", 2: "SET", 1: "ALMOST" };
+  const lightOverlay = !!opts.lightOverlay;
+
+  if (countdownTimerId) {
+    clearInterval(countdownTimerId);
+    countdownTimerId = null;
+  }
+  isCountingDown = true;
+  // カウント中は進行させない
+  if (!opts.keepGameStarted) {
+    gameStarted = false;
+  }
+
+  clearFadeOverlay();
+
   const countdownDisplay = document.getElementById("countdown-display");
   const countdownNumber = document.getElementById("countdown-number");
   const countdownSub = document.getElementById("countdown-sub");
   const countdownOverlay = document.getElementById("countdown-overlay");
   const countdownRing = document.getElementById("countdown-ring");
-  const modeSelectScreen = document.getElementById("mode-select-screen");
-  const subSelectScreen = document.getElementById("sub-select-screen");
-
-  if (modeSelectScreen) modeSelectScreen.classList.remove("visible");
-  if (subSelectScreen) subSelectScreen.classList.remove("visible");
-
-  resetWorldForMode();
-
-  const modeLabel = (currentConfig && currentConfig.name) ? currentConfig.name : "GET READY";
 
   function pulseRing() {
     if (!countdownRing) return;
@@ -2520,47 +3109,145 @@ function startCountdownAndGame() {
 
   function showCount(value) {
     if (!countdownNumber) return;
+    // アニメ再発火
+    countdownNumber.style.animation = "none";
     countdownNumber.className = "";
     void countdownNumber.offsetWidth;
+    countdownNumber.style.animation = "";
+
     if (value === "GO!") {
       countdownNumber.textContent = "GO!";
       countdownNumber.classList.add("cd-go");
-      if (countdownSub) countdownSub.textContent = modeLabel;
+      if (countdownSub) countdownSub.textContent = subForGo;
     } else {
       countdownNumber.textContent = String(value);
       countdownNumber.classList.add("cd-" + value);
-      if (countdownSub) {
-        const tips = { 3: "READY", 2: "SET", 1: "ALMOST" };
-        countdownSub.textContent = tips[value] || "GET READY";
-      }
+      if (countdownSub) countdownSub.textContent = tips[value] || "GET READY";
     }
-    if (value === 3) playCountdownSfx();
+    if (value === 3) {
+      try { playCountdownSfx(); } catch (e) {}
+    }
     pulseRing();
   }
 
-  if (countdownDisplay) {
-    if (countdownOverlay) countdownOverlay.classList.add("visible");
-    countdownDisplay.classList.add("visible");
-    let count = 3;
-    showCount(count);
-
-    const timer = setInterval(() => {
-      count--;
-      if (count > 0) {
-        showCount(count);
-      } else if (count === 0) {
-        showCount("GO!");
-      } else {
-        clearInterval(timer);
-        countdownDisplay.classList.remove("visible");
-        if (countdownOverlay) countdownOverlay.classList.remove("visible");
-        if (countdownRing) countdownRing.classList.remove("visible");
-        gameStarted = true;
-        playBGM.currentTime = 0;
-        playBGM.play().catch(e => console.log("BGMの再生がブロックされました", e));
-      }
-    }, 1000);
+  if (!countdownDisplay || !countdownNumber) {
+    isCountingDown = false;
+    onComplete();
+    return;
   }
+
+  if (countdownOverlay) {
+    countdownOverlay.style.display = "block";
+    countdownOverlay.style.opacity = "1";
+    if (lightOverlay) {
+      // 復活時：ゲーム画面が透けて見える
+      countdownOverlay.style.background = "rgba(8, 12, 28, 0.35)";
+    } else {
+      countdownOverlay.style.background = "";
+    }
+    countdownOverlay.classList.add("visible");
+  }
+  countdownDisplay.classList.add("visible");
+
+  // 3 を先に描画してから1秒待つ（setIntervalだと最初の1秒で3が見えない端末がある）
+  showCount(3);
+  let step = 0;
+  const steps = [2, 1, "GO!", null];
+  countdownTimerId = setInterval(() => {
+    const v = steps[step++];
+    if (v === null) {
+      clearInterval(countdownTimerId);
+      countdownTimerId = null;
+      hideCountdownUI();
+      isCountingDown = false;
+      onComplete();
+    } else {
+      showCount(v);
+    }
+  }, 1000);
+}
+
+function startCountdownAndGame() {
+  hideResultMenu();
+  hideSurveyNudge();
+  const modeSelectScreen = document.getElementById("mode-select-screen");
+  const subSelectScreen = document.getElementById("sub-select-screen");
+
+  if (modeSelectScreen) modeSelectScreen.classList.remove("visible");
+  if (subSelectScreen) subSelectScreen.classList.remove("visible");
+
+  clearFadeOverlay();
+  resetWorldForMode();
+  try { recordStat("play"); } catch (e) {}
+
+  const modeLabel = (currentConfig && currentConfig.name) ? currentConfig.name : "GET READY";
+
+  runNumberCountdown({
+    goSub: modeLabel,
+    onComplete: () => {
+      try {
+        // 地面付近の安定位置から開始（ワープ・落下を防ぐ）
+        Body.setPosition(player, { x: 200, y: canvas.height - 80 });
+        Body.setVelocity(player, { x: (currentConfig && currentConfig.baseSpeed) || 4, y: 0 });
+        Body.setAngle(player, 0);
+      } catch (e) {}
+      cameraX = 200 - canvas.width * 0.1;
+      stoppedTime = 0;
+      airborneFrames = 0;
+      upperZoneFrames = 0;
+      freezeFrames = 0;
+      isCountingDown = false;
+      gameStarted = true;
+      try {
+        playBGM.currentTime = 0;
+        playBGM.play().catch(() => {});
+      } catch (e) {}
+    }
+  });
+}
+
+function startReviveSequence() {
+  if (isReviving || gameOver || gameCleared) return;
+  isReviving = true;
+  // gameStarted は true のまま → カウント中もゲーム画面を描画
+  gameStarted = true;
+  reviveHoldX = player.position.x;
+  const centerY = canvas.height / 2;
+
+  try { releaseLines(); } catch (e) {}
+  try {
+    // カウント中も同じX・画面中央の高さに置いて見えるようにする
+    Body.setPosition(player, { x: reviveHoldX, y: centerY });
+    Body.setVelocity(player, { x: 0, y: 0 });
+  } catch (e) {}
+  cameraX = reviveHoldX - canvas.width * 0.1;
+  stoppedTime = 0;
+  airborneFrames = 0;
+  upperZoneFrames = 0;
+  freezeFrames = 0;
+
+  runNumberCountdown({
+    goSub: "復活！",
+    tips: { 3: "REVIVE", 2: "READY", 1: "SET" },
+    lightOverlay: true,
+    keepGameStarted: true,
+    onComplete: () => {
+      // 同じ横軸・画面中央の高さから再開
+      try {
+        Body.setPosition(player, { x: reviveHoldX, y: centerY });
+        Body.setVelocity(player, {
+          x: (currentConfig && currentConfig.baseSpeed) || 4,
+          y: 0
+        });
+      } catch (e) {}
+      cameraX = reviveHoldX - canvas.width * 0.1;
+      stoppedTime = 0;
+      airborneFrames = 0;
+      upperZoneFrames = 0;
+      isReviving = false;
+      gameStarted = true;
+    }
+  });
 }
 
 const STAGE_AREA_NAMES = {
@@ -2569,7 +3256,8 @@ const STAGE_AREA_NAMES = {
   3: "夜空エリア",
   4: "サイバーエリア",
   5: "溶岩エリア",
-  6: "虚空エリア"
+  6: "虚空エリア",
+  7: "氷雪エリア"
 };
 
 const STAGE_ORDER = [
@@ -2578,7 +3266,8 @@ const STAGE_ORDER = [
   "stage3-1", "stage3-2", "stage3-3",
   "stage4-1", "stage4-2", "stage4-3",
   "stage5-1", "stage5-2", "stage5-3",
-  "stage6-1", "stage6-2", "stage6-3"
+  "stage6-1", "stage6-2", "stage6-3",
+  "stage7-1", "stage7-2", "stage7-3"
 ];
 
 
@@ -2600,7 +3289,10 @@ const STAGE_DISPLAY_NAMES = {
   "stage5-3": "火山の城",
   "stage6-1": "虚空の道",
   "stage6-2": "星屑の庭",
-  "stage6-3": "終焉の城"
+  "stage6-3": "終焉の城",
+  "stage7-1": "氷の洞窟",
+  "stage7-2": "吹雪の橋",
+  "stage7-3": "極寒の頂"
 };
 
 // 名所画像（あれば使用） landmark_1.png / landmark_2.png / landmark_3.png
@@ -2614,18 +3306,23 @@ function loadSpotLandmark(imgEl, world, sub) {
     "1": { "1": "fort", "2": "ruins", "3": "tower" },
     "2": { "1": "lantern", "2": "bridge", "3": "sunset_castle" },
     "3": { "1": "starpath", "2": "moon_ruins", "3": "night_tower" },
-    "4": { "1": "cyber_gate", "2": "circuit", "3": "core_tower" },
-    "5": { "1": "lava_path", "2": "fire_bridge", "3": "volcano_castle" },
-    "6": { "1": "void_path", "2": "star_garden", "3": "final_castle" }
+    "4": { "1": "night_tower", "2": "ruins", "3": "tower" },
+    "5": { "1": "fort", "2": "bridge", "3": "sunset_castle" },
+    "6": { "1": "starpath", "2": "moon_ruins", "3": "night_tower" },
+    "7": { "1": "tower", "2": "bridge", "3": "fort" }
   };
   const wkey = (namedByWorld[String(world)] || {})[String(sub)];
   const skey = namedBySub[String(sub)] || String(sub);
-  const candidates = [
+  const baseNames = [
     "landmark_w" + world + "_" + sub + ".png",
     wkey ? ("landmark_" + wkey + ".png") : null,
     "landmark_" + skey + ".png",
     "landmark_" + sub + ".png"
   ].filter(Boolean);
+  const candidates = [];
+  baseNames.forEach((n) => {
+    assetDirCandidates(n).forEach((u) => candidates.push(u));
+  });
   let i = 0;
   const tryNext = () => {
     if (i >= candidates.length) {
@@ -2660,7 +3357,7 @@ function setupImgButtonFallback(btn) {
   }
 }
 
-const WORLD_COUNT = 6;
+const WORLD_COUNT = 7;
 let currentWorldPage = 1; // 1..6
 
 function getClearedStages() {
@@ -2697,48 +3394,59 @@ function applyNodeLockState(btn, unlocked, cleared) {
 // 使えるファイル: tree.png / tree2.png / tree3.png / bush.png / rock.png
 const WORLD_DECO_LAYOUT = {
   1: [
-    { src: ["tree.png", "tree1.png"], left: 8, top: 48, w: 48 },
-    { src: ["tree2.png", "tree.png"], left: 28, top: 55, w: 42 },
-    { src: ["bush.png", "tree.png"], left: 55, top: 70, w: 36 },
-    { src: ["tree3.png", "tree.png"], left: 68, top: 50, w: 50 },
-    { src: ["tree.png"], left: 88, top: 58, w: 44 }
+    { src: ["tree1.png", "tree.png", "tree1.png"], left: 8, top: 48, w: 48 },
+    { src: ["tree2.png", "tree1.png", "tree.png"], left: 28, top: 55, w: 42 },
+    { src: ["bush.png", "tree1.png", "tree.png"], left: 55, top: 70, w: 36 },
+    { src: ["tree3.png", "tree1.png", "tree.png"], left: 68, top: 50, w: 50 },
+    { src: ["tree1.png", "tree.png"], left: 88, top: 58, w: 44 }
   ],
   2: [
-    { src: ["tree.png", "tree2.png"], left: 10, top: 50, w: 46 },
-    { src: ["tree2.png", "tree.png"], left: 40, top: 58, w: 42 },
-    { src: ["bush.png", "tree.png"], left: 62, top: 68, w: 36 },
-    { src: ["tree3.png", "tree.png"], left: 85, top: 48, w: 48 }
+    { src: ["tree1.png", "tree.png", "tree2.png"], left: 10, top: 50, w: 46 },
+    { src: ["tree2.png", "tree1.png", "tree.png"], left: 40, top: 58, w: 42 },
+    { src: ["bush.png", "tree1.png", "tree.png"], left: 62, top: 68, w: 36 },
+    { src: ["tree3.png", "tree1.png", "tree.png"], left: 85, top: 48, w: 48 }
   ],
   3: [
-    { src: ["tree.png"], left: 12, top: 55, w: 40 },
-    { src: ["tree2.png", "tree.png"], left: 50, top: 60, w: 44 },
-    { src: ["tree3.png", "tree.png"], left: 80, top: 52, w: 46 }
+    { src: ["tree1.png", "tree.png"], left: 12, top: 55, w: 40 },
+    { src: ["tree2.png", "tree1.png", "tree.png"], left: 50, top: 60, w: 44 },
+    { src: ["tree3.png", "tree1.png", "tree.png"], left: 80, top: 52, w: 46 }
   ],
   4: [
-    { src: ["tree.png"], left: 15, top: 58, w: 40 },
-    { src: ["tree2.png", "tree.png"], left: 70, top: 55, w: 42 }
+    { src: ["tree1.png", "tree.png"], left: 15, top: 58, w: 40 },
+    { src: ["tree2.png", "tree1.png", "tree.png"], left: 70, top: 55, w: 42 }
   ],
   5: [
-    { src: ["rock.png", "tree.png"], left: 18, top: 62, w: 40 },
-    { src: ["rock.png", "tree2.png", "tree.png"], left: 55, top: 68, w: 36 },
-    { src: ["tree.png"], left: 82, top: 50, w: 40 }
+    { src: ["rock.png", "tree1.png", "tree.png"], left: 18, top: 62, w: 40 },
+    { src: ["rock.png", "tree2.png", "tree1.png", "tree.png"], left: 55, top: 68, w: 36 },
+    { src: ["tree1.png", "tree.png"], left: 82, top: 50, w: 40 }
   ],
   6: [
-    { src: ["tree.png"], left: 20, top: 55, w: 38 },
-    { src: ["tree2.png", "tree.png"], left: 75, top: 50, w: 42 }
+    { src: ["tree1.png", "tree.png"], left: 20, top: 55, w: 38 },
+    { src: ["tree2.png", "tree1.png", "tree.png"], left: 75, top: 50, w: 42 }
+  ],
+  7: [
+    { src: ["tree1.png", "tree.png"], left: 15, top: 60, w: 36 },
+    { src: ["tree2.png", "tree1.png", "tree.png"], left: 70, top: 55, w: 40 }
   ]
 };
 
 function setImageWithFallback(img, candidates, onFail) {
+  const list = [];
+  (candidates || []).forEach((n) => {
+    assetDirCandidates(n).forEach((u) => list.push(u));
+  });
   let i = 0;
   const tryNext = () => {
-    if (i >= candidates.length) {
+    if (i >= list.length) {
       if (onFail) onFail();
       return;
     }
-    const url = candidates[i++];
+    const url = list[i++];
     const probe = new Image();
-    probe.onload = () => { img.src = url; img.style.display = ""; };
+    probe.onload = () => {
+      img.src = url;
+      img.style.display = "";
+    };
     probe.onerror = tryNext;
     probe.src = url;
   };
@@ -2815,15 +3523,22 @@ function updateWorldPage(mainNum) {
   // 背景画像（無ければCSSグラデ）＋装飾
   if (canvas) {
     canvas.setAttribute("data-main", String(currentWorldPage));
-    const imgUrl = "map_world" + currentWorldPage + ".png";
-    const probe = new Image();
-    probe.onload = () => {
-      canvas.style.backgroundImage = "url('" + imgUrl + "')";
+    const mapNames = assetDirCandidates("map_world" + currentWorldPage + ".png");
+    let mi = 0;
+    const tryMap = () => {
+      if (mi >= mapNames.length) {
+        canvas.style.backgroundImage = "";
+        return;
+      }
+      const imgUrl = mapNames[mi++];
+      const probe = new Image();
+      probe.onload = () => {
+        canvas.style.backgroundImage = "url('" + imgUrl + "')";
+      };
+      probe.onerror = tryMap;
+      probe.src = imgUrl;
     };
-    probe.onerror = () => {
-      canvas.style.backgroundImage = "";
-    };
-    probe.src = imgUrl;
+    tryMap();
   }
   buildWorldDecorations(currentWorldPage);
 
@@ -2849,7 +3564,9 @@ function updateWorldPage(mainNum) {
     if (numEl) numEl.textContent = currentWorldPage + "-" + sub;
     const plateTitle = btn.querySelector(".plate-title");
     if (plateTitle) {
-      plateTitle.textContent = STAGE_DISPLAY_NAMES[modeKey] || (currentWorldPage + "-" + sub);
+      const stars = getStageDifficultyStars(modeKey);
+      const starStr = "★".repeat(stars) + "☆".repeat(5 - stars);
+      plateTitle.textContent = (STAGE_DISPLAY_NAMES[modeKey] || (currentWorldPage + "-" + sub)) + " " + starStr;
     }
     const landmark = btn.querySelector(".spot-landmark");
     loadSpotLandmark(landmark, currentWorldPage, sub);
@@ -3000,8 +3717,87 @@ function initMapSwipeScroll() {
   }
 }
 
+
+function refreshSettingsPanel() {
+  const s = loadPlayStats();
+  const plays = document.getElementById("stat-plays");
+  const dist = document.getElementById("stat-dist");
+  const clears = document.getElementById("stat-clears");
+  const deaths = document.getElementById("stat-deaths");
+  const best = document.getElementById("stat-best");
+  const abil = document.getElementById("stat-abil");
+  if (plays) plays.textContent = String(s.playCount);
+  if (dist) dist.textContent = Math.floor(s.totalDistance) + " m";
+  if (clears) clears.textContent = String(s.clears);
+  if (deaths) deaths.textContent = String(s.deaths);
+  if (best) best.textContent = Math.floor(s.bestScore) + " m";
+  if (abil) {
+    const a = s.abilities || {};
+    abil.textContent = "W" + (a.warp || 0) + " / R" + (a.revive || 0) + " / F" + (a.freeze || 0);
+  }
+  const seEn = document.getElementById("set-se-enabled");
+  const seVol = document.getElementById("set-se-volume");
+  if (seEn) seEn.checked = isSeEnabled();
+  if (seVol) {
+    const v = Number(getSavedSeValue("drawRunSeVolume"));
+    seVol.value = Number.isFinite(v) ? v : 28;
+  }
+}
+
+function initSettingsUI() {
+  const btn = document.getElementById("settings-button");
+  const overlay = document.getElementById("settings-overlay");
+  const closeBtn = document.getElementById("settings-close");
+  const seEn = document.getElementById("set-se-enabled");
+  const seVol = document.getElementById("set-se-volume");
+  function open() {
+    if (overlay) overlay.classList.add("visible");
+    refreshSettingsPanel();
+  }
+  function close() {
+    if (overlay) overlay.classList.remove("visible");
+  }
+  if (btn && !btn.dataset.bound) {
+    btn.dataset.bound = "1";
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      try { playButtonSfx(); } catch (err) {}
+      open();
+    });
+  }
+  if (closeBtn && !closeBtn.dataset.bound) {
+    closeBtn.dataset.bound = "1";
+    closeBtn.addEventListener("click", () => {
+      try { playButtonSfx(); } catch (err) {}
+      close();
+    });
+  }
+  if (overlay && !overlay.dataset.bound) {
+    overlay.dataset.bound = "1";
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) close();
+    });
+  }
+  if (seEn && !seEn.dataset.bound) {
+    seEn.dataset.bound = "1";
+    seEn.addEventListener("change", () => {
+      saveSeValue("drawRunSeEnabled", seEn.checked ? "true" : "false");
+    });
+  }
+  if (seVol && !seVol.dataset.bound) {
+    seVol.dataset.bound = "1";
+    seVol.addEventListener("input", () => {
+      saveSeValue("drawRunSeVolume", String(seVol.value));
+    });
+  }
+}
+
 function initModeSelectUI() {
   initWarpButton();
+  initAbilityChoiceUI();
+  initSettingsUI();
+  initResultMenuUI();
   initMapSwipeScroll();
   setupImgButtonFallback(document.getElementById("challenge-btn"));
   setupImgButtonFallback(document.getElementById("mode-back-btn"));
@@ -3024,16 +3820,30 @@ function initModeSelectUI() {
   function hideTitleButtons() {
     if (startBtn) startBtn.style.display = "none";
     if (scoreAttackBtn) scoreAttackBtn.style.display = "none";
+    const setBtn = document.getElementById("settings-button");
+    if (setBtn) setBtn.style.display = "none";
+    const surveyBtn = document.getElementById("survey-button");
+    if (surveyBtn) surveyBtn.style.display = "none";
     if (startScreen) {
-      startScreen.querySelectorAll("a").forEach(btn => btn.style.display = "none");
+      startScreen.querySelectorAll("a").forEach(btn => {
+        if (btn.id === "survey-button") return;
+        btn.style.display = "none";
+      });
     }
   }
 
   function showTitleButtons() {
     if (startBtn) startBtn.style.display = "block";
     if (scoreAttackBtn) scoreAttackBtn.style.display = "block";
+    const setBtn = document.getElementById("settings-button");
+    if (setBtn) setBtn.style.display = "block";
+    const surveyBtn = document.getElementById("survey-button");
+    if (surveyBtn) surveyBtn.style.display = "block";
     if (startScreen) {
-      startScreen.querySelectorAll("a").forEach(btn => btn.style.display = "block");
+      startScreen.querySelectorAll("a").forEach(btn => {
+        if (btn.id === "survey-button") return;
+        btn.style.display = "block";
+      });
     }
   }
 

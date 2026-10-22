@@ -3,117 +3,240 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>CUSTOM - DRAW RUN</title>
+  <title>スキン | DRAW LINE RUN</title>
   <style>
+
+    :root {
+      --pop-sky-top: #7ec8ff;
+      --pop-sky-bot: #e8f6ff;
+      --pop-card: #ffffff;
+      --pop-ink: #1a2a4a;
+      --pop-accent: #ffb800;
+      --pop-cyan: #00c2ff;
+      --pop-pink: #ff5fa2;
+      --pop-green: #3ddc84;
+      --pop-shadow: 0 8px 24px rgba(30, 80, 140, 0.18);
+    }
     html, body {
-      width: 100vw; height: 100vh; overflow: hidden; margin: 0; padding: 0;
-      display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-      padding-top: 3vh;
-      background:
-        radial-gradient(ellipse at 20% 15%, rgba(0, 180, 255, 0.08) 0%, transparent 45%),
-        radial-gradient(ellipse at 80% 80%, rgba(80, 40, 160, 0.12) 0%, transparent 50%),
-        linear-gradient(180deg, #070b16 0%, #0c1224 50%, #0a1020 100%);
-      color: #e8f4ff; font-family: 'Helvetica Neue', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      font-family: 'Helvetica Neue', 'Hiragino Sans', 'Noto Sans JP', Arial, sans-serif;
+      background: linear-gradient(180deg, var(--pop-sky-top) 0%, #b8e4ff 40%, var(--pop-sky-bot) 100%);
+      color: var(--pop-ink);
     }
-    body { transform-origin: center top; }
-    h1 {
-      font-size: 26px; font-weight: 900; letter-spacing: 4px; margin: 0 0 8px 0; color: #fff;
-      text-shadow: 0 0 12px rgba(0, 229, 255, 0.7), 0 0 28px rgba(0, 180, 255, 0.35);
-    }
-    .selected-name {
-      font-size: 13px; font-weight: bold; color: #00e5ff; letter-spacing: 1px;
-      margin-bottom: 10px; text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
-      min-height: 1.2em; text-align: center; padding: 0 12px;
-    }
-    .custom-container {
-      background: rgba(8, 16, 32, 0.72); border: 1.5px solid rgba(0, 200, 255, 0.25);
-      border-radius: 18px; padding: 12px 10px 14px; width: 92%; max-width: 360px;
-      max-height: 64vh; overflow-y: auto;
-      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4), 0 0 24px rgba(0, 180, 255, 0.08);
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 16px 12px 32px;
       box-sizing: border-box;
     }
-    .custom-container::-webkit-scrollbar { width: 5px; }
-    .custom-container::-webkit-scrollbar-thumb { background: rgba(0, 229, 255, 0.4); border-radius: 3px; }
-    .skin-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-    .skin-card {
-      position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px;
-      padding: 8px 3px 6px; background: rgba(0, 30, 55, 0.45);
-      border: 1.5px solid rgba(0, 180, 255, 0.22); border-radius: 12px; cursor: pointer;
-      transition: transform 0.12s, border-color 0.15s, box-shadow 0.15s, background 0.15s;
-      -webkit-tap-highlight-color: transparent;
+    .pop-wrap {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 24px;
+      box-shadow: var(--pop-shadow);
+      border: 3px solid rgba(255, 255, 255, 0.9);
+      overflow: hidden;
+      position: relative;
     }
-    .skin-card:hover:not(.locked) { border-color: rgba(0, 229, 255, 0.55); background: rgba(0, 50, 80, 0.5); }
-    .skin-card:active:not(.locked) { transform: scale(0.96); }
-    .skin-card.selected {
-      border-color: #00e5ff; background: rgba(0, 70, 100, 0.55);
-      box-shadow: 0 0 14px rgba(0, 229, 255, 0.35);
+    .pop-header {
+      background: linear-gradient(135deg, #4db8ff 0%, #7ee0ff 50%, #ffe566 100%);
+      padding: 18px 16px 16px;
+      text-align: center;
+      position: relative;
     }
-    .skin-card.selected:not(.locked)::after {
-      content: "✓"; position: absolute; top: 3px; right: 4px; width: 15px; height: 15px;
-      border-radius: 50%; background: #00e5ff; color: #0a1525; font-size: 10px; font-weight: bold;
-      line-height: 15px; text-align: center; box-shadow: 0 0 6px rgba(0, 229, 255, 0.5);
+    .pop-header h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 2px 0 rgba(0, 80, 140, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15);
+      letter-spacing: 1px;
     }
-    .skin-card.locked {
-      filter: grayscale(0.7); opacity: 0.72; cursor: not-allowed;
-      border-color: rgba(100, 110, 130, 0.4);
+    .pop-header .sub {
+      margin-top: 4px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.95);
+      font-weight: bold;
     }
-    .skin-card.locked .skin-thumb { background: #1a2233; }
-    .lock-badge {
-      position: absolute; top: 4px; left: 4px; font-size: 11px; z-index: 2;
+    .pop-body {
+      padding: 16px 14px 20px;
     }
-    .skin-thumb {
-      width: 58px; height: 58px; border-radius: 10px;
-      background: radial-gradient(circle at 50% 40%, #ffffff 0%, #e8f4ff 55%, #c8dff5 100%);
+    .pop-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(40, 100, 160, 0.1);
+      border: 2px solid #e8f4ff;
+    }
+    .pop-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px 20px;
+      border-radius: 999px;
+      border: 3px solid #1a3a6a;
+      background: linear-gradient(180deg, #ffe566 0%, #ffb800 100%);
+      color: #1a2a4a;
+      font-weight: 900;
+      font-size: 15px;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #c99000, 0 6px 14px rgba(0, 0, 0, 0.12);
+      transition: transform 0.1s;
+    }
+    .pop-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #c99000, 0 3px 8px rgba(0, 0, 0, 0.12);
+    }
+    .pop-btn.cyan {
+      background: linear-gradient(180deg, #7ee0ff 0%, #00c2ff 100%);
+      border-color: #0a5a8a;
+      box-shadow: 0 4px 0 #0080b0, 0 6px 14px rgba(0, 0, 0, 0.12);
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    .pop-btn.pink {
+      background: linear-gradient(180deg, #ff9fd0 0%, #ff5fa2 100%);
+      border-color: #a03060;
+      box-shadow: 0 4px 0 #c04070, 0 6px 14px rgba(0, 0, 0, 0.12);
+      color: #fff;
+    }
+    .pop-footer {
+      text-align: center;
+      padding: 4px 0 8px;
+    }
+    .rank-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      margin-bottom: 8px;
+      background: linear-gradient(90deg, #f0f9ff, #fff);
+      border: 2px solid #d6eeff;
+    }
+    .rank-item.top1 { border-color: #ffd700; background: linear-gradient(90deg, #fff8e0, #fff); }
+    .rank-item.top2 { border-color: #c0d0e0; }
+    .rank-item.top3 { border-color: #e8b080; }
+    .rank-num {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: #4db8ff;
+      color: #fff;
+      font-weight: 900;
       display: flex; align-items: center; justify-content: center;
-      border: 1px solid rgba(0, 180, 255, 0.25); overflow: hidden;
+      font-size: 14px;
+      flex-shrink: 0;
     }
-    .skin-thumb img {
-      max-width: 85%; max-height: 85%; object-fit: contain;
-      filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.8));
+    .rank-item.top1 .rank-num { background: linear-gradient(180deg, #ffe566, #ffb800); color: #5a3a00; }
+    .rank-score { margin-left: auto; font-weight: 900; color: #00a0e0; font-size: 16px; }
+    .skin-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
     }
-    .skin-card.locked .skin-thumb img { opacity: 0.45; }
-    .skin-label {
-      font-size: 8.5px; font-weight: bold; color: rgba(200, 225, 245, 0.85);
-      text-align: center; line-height: 1.2; max-width: 100%; overflow: hidden;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-      word-break: break-all; min-height: 2.3em;
+    .skin-card {
+      border-radius: 16px;
+      border: 3px solid #d6eeff;
+      background: #f8fcff;
+      padding: 10px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.12s, border-color 0.12s;
     }
-    .skin-card.selected .skin-label { color: #7ee8ff; }
-    .unlock-hint {
-      margin-top: 10px; padding: 8px 10px; border-radius: 10px;
-      background: rgba(0, 40, 70, 0.5); border: 1px solid rgba(0, 200, 255, 0.2);
-      font-size: 11px; line-height: 1.45; color: rgba(200, 220, 240, 0.85);
-      min-height: 2.8em;
+    .skin-card:hover { transform: scale(1.03); }
+    .skin-card.selected {
+      border-color: #ffb800;
+      background: #fff8e0;
+      box-shadow: 0 0 0 3px rgba(255, 184, 0, 0.25);
     }
-    .unlock-hint strong { color: #00e5ff; }
-    .unlock-hint .locked-msg { color: #ffb86b; }
-    .unlock-hint .ok-msg { color: #7dffb0; }
-    .back-btn {
-      margin-top: 12px; padding: 11px 36px; background: transparent; color: #00e5ff;
-      text-decoration: none; border-radius: 24px; font-weight: bold; font-size: 14px;
-      border: 1.5px solid #00e5ff; box-shadow: 0 0 14px rgba(0, 229, 255, 0.25);
-      cursor: pointer; display: inline-block; letter-spacing: 1px;
+    .skin-card.locked { opacity: 0.55; filter: grayscale(0.4); }
+    .skin-card img {
+      width: 72px; height: 72px;
+      object-fit: contain;
+      image-rendering: auto;
     }
+    .skin-name { font-size: 12px; font-weight: bold; margin-top: 4px; color: #1a2a4a; }
+    .skin-unlock { font-size: 10px; color: #888; margin-top: 2px; line-height: 1.3; }
+    .howto-step {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .howto-num {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #ffe566, #ffb800);
+      border: 2px solid #1a3a6a;
+      font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 13px;
+    }
+    .howto-text { font-size: 13px; line-height: 1.5; color: #2a3a5a; }
+    .howto-text strong { color: #0080c0; }
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    input[type="range"] {
+      flex: 1;
+      accent-color: #00c2ff;
+    }
+    .toggle {
+      appearance: none;
+      width: 48px; height: 28px;
+      border-radius: 14px;
+      background: #c8d8e8;
+      position: relative;
+      cursor: pointer;
+      border: 2px solid #8aa;
+      transition: background 0.15s;
+    }
+    .toggle:checked { background: #3ddc84; border-color: #1a8a50; }
+    .toggle::after {
+      content: "";
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      transition: left 0.15s;
+    }
+    .toggle:checked::after { left: 22px; }
+
   </style>
 </head>
 <body>
-  <h1>SKIN</h1>
-  <div class="selected-name" id="skin-name-display">選択中: —</div>
-  <div class="custom-container">
-    <div class="skin-grid" id="skin-grid"></div>
-    <div class="unlock-hint" id="unlock-hint">キャラをタップして選択</div>
+  <div class="pop-wrap">
+    <div class="pop-header">
+      <h1>✏️ スキン</h1>
+      <div class="sub">キャラクターを選ぼう</div>
+    </div>
+    <div class="pop-body">
+      <div class="pop-card">
+        <div class="skin-grid" id="skin-grid"></div>
+      </div>
+      <div class="pop-footer">
+        <a class="pop-btn cyan" href="index.html">決定して戻る</a>
+      </div>
+    </div>
   </div>
-  <a href="index.html" class="back-btn menu-btn">BACK</a>
-  <audio id="setting-bgm" src="title.mp3" loop></audio>
-  <audio id="sfx-button" src="sfx_button.mp3" preload="auto"></audio>
-<script>
-    function adjustScale() {
-      const scale = Math.min(window.innerWidth / 400, window.innerHeight / 700);
-      document.body.style.transform = `scale(${scale > 1 ? 1 : scale})`;
-    }
-    window.addEventListener("load", adjustScale);
-    window.addEventListener("resize", adjustScale);
-
+  <script>
     const characterList = [
       { src: "player.png", name: "クロカゲ", unlock: null },
       { src: "player2.png", name: "ハムゾウ", unlock: null },
@@ -121,157 +244,64 @@
       { src: "player4.png", name: "ロビン・ドングリ", unlock: null },
       { src: "player5.png", name: "サー・ロデリック", unlock: null },
       { src: "player6.png", name: "ダスティ・アイアンヒゲ", unlock: null },
-      { src: "player7.png", name: "キャプテン・バーナビー", unlock: "score200", unlockText: "スコアアタックで200m達成" },
-      { src: "player8.png", name: "ネオン・サイファー", unlock: "stage4all", unlockText: "STAGE1〜4をすべてクリア" }
+      { src: "player7.png", name: "キャプテン・バーナビー", unlock: "score200", unlockText: "スコアアタック 200m" },
+      { src: "player8.png", name: "ネオン・サイファー", unlock: "stage4all", unlockText: "STAGE1〜4 全クリア" }
     ];
 
     function getBestScoreAttack() {
       let best = 0;
       try {
-        (JSON.parse(localStorage.getItem("drawRunScores")) || []).forEach((s) => {
+        const scores = JSON.parse(localStorage.getItem("drawRunScores")) || [];
+        scores.forEach((s) => {
           const v = typeof s === "object" && s ? Number(s.score) : Number(s);
           if (Number.isFinite(v) && v > best) best = v;
         });
       } catch (e) {}
-      try {
-        const last = JSON.parse(localStorage.getItem("drawRunLastScore"));
-        if (last && Number(last.score) > best) best = Number(last.score);
-      } catch (e) {}
-      try {
-        const hi = Number(localStorage.getItem("drawRunBestScore"));
-        if (Number.isFinite(hi) && hi > best) best = hi;
-      } catch (e) {}
       return best;
     }
-
-    function isStage4AllCleared() {
+    function isStageRangeFullyCleared(maxMain) {
       let cleared = {};
       try { cleared = JSON.parse(localStorage.getItem("drawRunStageClears")) || {}; } catch (e) {}
-      for (let m = 1; m <= 4; m++) {
+      for (let m = 1; m <= maxMain; m++) {
         for (let s = 1; s <= 3; s++) {
           if (!cleared["stage" + m + "-" + s]) return false;
         }
       }
       return true;
     }
-
-    function isUnlocked(char) {
-      if (!char.unlock) return true;
-      if (char.unlock === "score200") return getBestScoreAttack() >= 200;
-      if (char.unlock === "stage4all") return isStage4AllCleared();
+    function isUnlocked(i) {
+      const c = characterList[i];
+      if (!c || !c.unlock) return true;
+      if (c.unlock === "score200") return getBestScoreAttack() >= 200;
+      if (c.unlock === "stage4all") return isStageRangeFullyCleared(4);
       return true;
     }
 
-    let currentSkinIndex = parseInt(localStorage.getItem("drawRunSkinIndex")) || 0;
-    if (currentSkinIndex < 0 || currentSkinIndex >= characterList.length) currentSkinIndex = 0;
-    if (!isUnlocked(characterList[currentSkinIndex])) {
-      currentSkinIndex = 0;
-      localStorage.setItem("drawRunSkinIndex", "0");
-    }
+    let current = parseInt(localStorage.getItem("drawRunSkinIndex"), 10) || 0;
+    if (current < 0 || current >= characterList.length) current = 0;
 
-    const grid = document.getElementById("skin-grid");
-    const nameDisplay = document.getElementById("skin-name-display");
-    const unlockHint = document.getElementById("unlock-hint");
-
-    function updateHint(index) {
-      const char = characterList[index];
-      if (!char.unlock) {
-        unlockHint.innerHTML = "<strong>" + char.name + "</strong> — 最初から使用可能";
-        return;
-      }
-      const ok = isUnlocked(char);
-      if (ok) {
-        unlockHint.innerHTML = "<span class=\"ok-msg\">✓ 解放済み</span> — " + char.unlockText;
-      } else {
-        let progress = "";
-        if (char.unlock === "score200") {
-          progress = "（現在の最高: " + getBestScoreAttack() + "m）";
-        } else if (char.unlock === "stage4all") {
-          let cleared = {};
-          try { cleared = JSON.parse(localStorage.getItem("drawRunStageClears")) || {}; } catch (e) {}
-          let n = 0;
-          for (let m = 1; m <= 4; m++) for (let s = 1; s <= 3; s++) if (cleared["stage"+m+"-"+s]) n++;
-          progress = "（クリア " + n + " / 12）";
-        }
-        unlockHint.innerHTML = "<span class=\"locked-msg\">🔒 未解放</span><br><strong>条件:</strong> " + char.unlockText + " " + progress;
-      }
-    }
-
-    function selectSkin(index) {
-      const char = characterList[index];
-      updateHint(index);
-      if (!isUnlocked(char)) {
-        nameDisplay.textContent = "未解放: " + char.name;
-        grid.querySelectorAll(".skin-card").forEach((card, i) => {
-          card.classList.toggle("selected", false);
+    function render() {
+      const grid = document.getElementById("skin-grid");
+      grid.innerHTML = characterList.map((c, i) => {
+        const unlocked = isUnlocked(i);
+        const selected = i === current;
+        return '<div class="skin-card' + (selected ? ' selected' : '') + (unlocked ? '' : ' locked') + '" data-i="' + i + '">' +
+          '<img src="skin/' + c.src + '" alt="" onerror="this.onerror=null;this.src=\'' + c.src + '\'">' +
+          '<div class="skin-name">' + (unlocked ? c.name : "???") + '</div>' +
+          (!unlocked ? '<div class="skin-unlock">' + (c.unlockText || "未解放") + '</div>' : '') +
+          '</div>';
+      }).join("");
+      grid.querySelectorAll(".skin-card").forEach((card) => {
+        card.addEventListener("click", () => {
+          const i = Number(card.dataset.i);
+          if (!isUnlocked(i)) return;
+          current = i;
+          localStorage.setItem("drawRunSkinIndex", String(i));
+          render();
         });
-        return;
-      }
-      currentSkinIndex = index;
-      localStorage.setItem("drawRunSkinIndex", String(currentSkinIndex));
-      nameDisplay.textContent = "選択中: " + char.name;
-      grid.querySelectorAll(".skin-card").forEach((card, i) => {
-        card.classList.toggle("selected", i === currentSkinIndex);
       });
     }
-
-    characterList.forEach((char, i) => {
-      const unlocked = isUnlocked(char);
-      const card = document.createElement("button");
-      card.type = "button";
-      card.className = "skin-card menu-btn" + (unlocked ? "" : " locked");
-      card.setAttribute("aria-label", char.name);
-      card.innerHTML =
-        (unlocked ? "" : '<span class="lock-badge">🔒</span>') +
-        '<div class="skin-thumb"><img src="' + char.src + '" alt="' + char.name + '"></div>' +
-        '<div class="skin-label">' + char.name + '</div>';
-      card.addEventListener("click", () => selectSkin(i));
-      grid.appendChild(card);
-    });
-    selectSkin(currentSkinIndex);
-
-    const settingBgm = document.getElementById("setting-bgm");
-    const sfxButton = document.getElementById("sfx-button");
-    function isSeEnabled() {
-      return (localStorage.getItem("drawRunSeEnabled") ?? sessionStorage.getItem("drawRunSeEnabled")) !== "false";
-    }
-    function getSeVolume() {
-      const saved = localStorage.getItem("drawRunSeVolume") ?? sessionStorage.getItem("drawRunSeVolume");
-      const value = Number(saved);
-      if (!Number.isFinite(value)) return 0.28;
-      return Math.max(0, Math.min(100, value)) / 100;
-    }
-    function playButtonSfx() {
-      if (!sfxButton || !isSeEnabled()) return;
-      const volume = getSeVolume();
-      if (volume <= 0) return;
-      sfxButton.volume = volume;
-      sfxButton.currentTime = 0;
-      sfxButton.play().catch(() => {});
-    }
-    document.querySelectorAll(".menu-btn").forEach((btn) => {
-      btn.addEventListener("pointerdown", () => playButtonSfx());
-      btn.addEventListener("click", (e) => {
-        if (e.detail === 0) playButtonSfx();
-        if (btn.tagName === "A" || btn.href) {
-          e.preventDefault();
-          setTimeout(() => { window.location.href = btn.href; }, 250);
-        }
-      });
-    });
-
-    const savedVolume = localStorage.getItem("drawRunBgmVolume");
-    const savedPlayState = localStorage.getItem("drawRunBgmPlaying");
-    const savedCurrentTime = localStorage.getItem("drawRunBgmCurrentTime");
-    let isPlaying = savedPlayState !== "false";
-    if (savedVolume !== null) settingBgm.volume = savedVolume / 100;
-    else settingBgm.volume = 0.5;
-    if (savedCurrentTime !== null) settingBgm.currentTime = parseFloat(savedCurrentTime);
-    if (isPlaying) settingBgm.play().catch(() => {});
-    else settingBgm.pause();
-    window.addEventListener("beforeunload", () => {
-      localStorage.setItem("drawRunBgmCurrentTime", settingBgm.currentTime);
-    });
+    render();
   </script>
 </body>
 </html>

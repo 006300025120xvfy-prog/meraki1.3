@@ -3,344 +3,258 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>HOW TO PLAY - DRAW RUN</title>
+  <title>遊び方 | DRAW LINE RUN</title>
   <style>
+
+    :root {
+      --pop-sky-top: #7ec8ff;
+      --pop-sky-bot: #e8f6ff;
+      --pop-card: #ffffff;
+      --pop-ink: #1a2a4a;
+      --pop-accent: #ffb800;
+      --pop-cyan: #00c2ff;
+      --pop-pink: #ff5fa2;
+      --pop-green: #3ddc84;
+      --pop-shadow: 0 8px 24px rgba(30, 80, 140, 0.18);
+    }
     html, body {
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
       margin: 0;
       padding: 0;
+      width: 100%;
+      min-height: 100%;
+      font-family: 'Helvetica Neue', 'Hiragino Sans', 'Noto Sans JP', Arial, sans-serif;
+      background: linear-gradient(180deg, var(--pop-sky-top) 0%, #b8e4ff 40%, var(--pop-sky-bot) 100%);
+      color: var(--pop-ink);
+    }
+    body {
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding-top: 3vh;
-      background:
-        radial-gradient(ellipse at 20% 15%, rgba(0, 180, 255, 0.08) 0%, transparent 45%),
-        radial-gradient(ellipse at 80% 80%, rgba(80, 40, 160, 0.12) 0%, transparent 50%),
-        linear-gradient(180deg, #070b16 0%, #0c1224 50%, #0a1020 100%);
-      color: #e8f4ff;
-      font-family: 'Helvetica Neue', Arial, sans-serif;
-    }
-
-    body { transform-origin: center top; }
-
-    h1 {
-      font-size: 26px;
-      font-weight: 900;
-      letter-spacing: 3px;
-      margin: 0 0 12px 0;
-      color: #fff;
-      text-shadow:
-        0 0 12px rgba(0, 229, 255, 0.7),
-        0 0 28px rgba(0, 180, 255, 0.35);
-    }
-
-    .howto-container {
-      background: rgba(8, 16, 32, 0.72);
-      border: 1.5px solid rgba(0, 200, 255, 0.22);
-      border-radius: 18px;
-      padding: 14px 16px;
-      width: 88%;
-      max-width: 380px;
-      max-height: 52vh;
-      overflow-y: auto;
-      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
-      text-align: left;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 16px 12px 32px;
       box-sizing: border-box;
     }
-
-    .howto-container::-webkit-scrollbar { width: 5px; }
-    .howto-container::-webkit-scrollbar-thumb {
-      background: rgba(0, 229, 255, 0.4);
-      border-radius: 3px;
+    .pop-wrap {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(255, 255, 255, 0.92);
+      border-radius: 24px;
+      box-shadow: var(--pop-shadow);
+      border: 3px solid rgba(255, 255, 255, 0.9);
+      overflow: hidden;
+      position: relative;
     }
-
-    .rule-section { margin-bottom: 12px; }
-    .rule-section:last-child { margin-bottom: 4px; }
-
-    .rule-section h2 {
-      font-size: 13px;
-      color: #00e5ff;
-      margin: 0 0 4px 0;
-      letter-spacing: 0.5px;
-      text-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
-    }
-
-    .rule-section p {
-      font-size: 11.5px;
-      line-height: 1.5;
-      margin: 0;
-      color: rgba(210, 225, 240, 0.85);
-    }
-
-    .rule-section strong { color: #7ee8ff; }
-
-    /* ===== 効果音設定 ===== */
-    .se-settings {
-      width: 88%;
-      max-width: 380px;
-      margin-top: 12px;
-      padding: 12px 16px;
-      box-sizing: border-box;
-      background: rgba(8, 16, 32, 0.65);
-      border: 1.5px solid rgba(0, 229, 255, 0.28);
-      border-radius: 16px;
-      box-shadow: 0 0 18px rgba(0, 180, 255, 0.1);
-    }
-
-    .se-settings-title {
-      margin: 0 0 10px 0;
-      color: #00e5ff;
-      font-size: 13px;
-      font-weight: bold;
-      letter-spacing: 2px;
+    .pop-header {
+      background: linear-gradient(135deg, #4db8ff 0%, #7ee0ff 50%, #ffe566 100%);
+      padding: 18px 16px 16px;
       text-align: center;
-      text-shadow: 0 0 8px rgba(0, 229, 255, 0.35);
+      position: relative;
     }
-
-    .se-setting-row {
+    .pop-header h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 2px 0 rgba(0, 80, 140, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15);
+      letter-spacing: 1px;
+    }
+    .pop-header .sub {
+      margin-top: 4px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.95);
+      font-weight: bold;
+    }
+    .pop-body {
+      padding: 16px 14px 20px;
+    }
+    .pop-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(40, 100, 160, 0.1);
+      border: 2px solid #e8f4ff;
+    }
+    .pop-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px 20px;
+      border-radius: 999px;
+      border: 3px solid #1a3a6a;
+      background: linear-gradient(180deg, #ffe566 0%, #ffb800 100%);
+      color: #1a2a4a;
+      font-weight: 900;
+      font-size: 15px;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #c99000, 0 6px 14px rgba(0, 0, 0, 0.12);
+      transition: transform 0.1s;
+    }
+    .pop-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #c99000, 0 3px 8px rgba(0, 0, 0, 0.12);
+    }
+    .pop-btn.cyan {
+      background: linear-gradient(180deg, #7ee0ff 0%, #00c2ff 100%);
+      border-color: #0a5a8a;
+      box-shadow: 0 4px 0 #0080b0, 0 6px 14px rgba(0, 0, 0, 0.12);
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    .pop-btn.pink {
+      background: linear-gradient(180deg, #ff9fd0 0%, #ff5fa2 100%);
+      border-color: #a03060;
+      box-shadow: 0 4px 0 #c04070, 0 6px 14px rgba(0, 0, 0, 0.12);
+      color: #fff;
+    }
+    .pop-footer {
+      text-align: center;
+      padding: 4px 0 8px;
+    }
+    .rank-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      margin-bottom: 8px;
+      background: linear-gradient(90deg, #f0f9ff, #fff);
+      border: 2px solid #d6eeff;
+    }
+    .rank-item.top1 { border-color: #ffd700; background: linear-gradient(90deg, #fff8e0, #fff); }
+    .rank-item.top2 { border-color: #c0d0e0; }
+    .rank-item.top3 { border-color: #e8b080; }
+    .rank-num {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: #4db8ff;
+      color: #fff;
+      font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .rank-item.top1 .rank-num { background: linear-gradient(180deg, #ffe566, #ffb800); color: #5a3a00; }
+    .rank-score { margin-left: auto; font-weight: 900; color: #00a0e0; font-size: 16px; }
+    .skin-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .skin-card {
+      border-radius: 16px;
+      border: 3px solid #d6eeff;
+      background: #f8fcff;
+      padding: 10px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.12s, border-color 0.12s;
+    }
+    .skin-card:hover { transform: scale(1.03); }
+    .skin-card.selected {
+      border-color: #ffb800;
+      background: #fff8e0;
+      box-shadow: 0 0 0 3px rgba(255, 184, 0, 0.25);
+    }
+    .skin-card.locked { opacity: 0.55; filter: grayscale(0.4); }
+    .skin-card img {
+      width: 72px; height: 72px;
+      object-fit: contain;
+      image-rendering: auto;
+    }
+    .skin-name { font-size: 12px; font-weight: bold; margin-top: 4px; color: #1a2a4a; }
+    .skin-unlock { font-size: 10px; color: #888; margin-top: 2px; line-height: 1.3; }
+    .howto-step {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .howto-num {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #ffe566, #ffb800);
+      border: 2px solid #1a3a6a;
+      font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 13px;
+    }
+    .howto-text { font-size: 13px; line-height: 1.5; color: #2a3a5a; }
+    .howto-text strong { color: #0080c0; }
+    .setting-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      margin-top: 8px;
-    }
-
-    .se-label {
-      color: rgba(200, 220, 240, 0.85);
-      font-size: 12px;
-      font-weight: bold;
-      white-space: nowrap;
-    }
-
-    #se-volume {
-      flex: 1;
-      min-width: 0;
-      accent-color: #00e5ff;
-      cursor: pointer;
-      transition: opacity 0.15s ease;
-    }
-
-    #se-volume:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-    }
-
-    #se-volume-value {
-      width: 42px;
-      color: #00e5ff;
-      font-size: 12px;
-      font-family: monospace;
-      text-align: right;
-      flex-shrink: 0;
-    }
-
-    #se-toggle {
-      border: 1.5px solid rgba(0, 229, 255, 0.45);
-      border-radius: 18px;
-      padding: 6px 18px;
-      background: rgba(0, 40, 70, 0.5);
-      color: #c8e8ff;
-      font-size: 12px;
-      font-weight: bold;
-      cursor: pointer;
-      min-width: 90px;
-      transition: 0.15s ease;
-      letter-spacing: 1px;
-    }
-
-    #se-toggle.on {
-      background: linear-gradient(135deg, rgba(0, 120, 140, 0.7), rgba(0, 200, 220, 0.55));
-      color: #e8ffff;
-      border-color: #00e5ff;
-      box-shadow: 0 0 12px rgba(0, 229, 255, 0.3);
-    }
-
-    #se-toggle.off {
-      background: rgba(255, 60, 80, 0.12);
-      color: #ff9b9b;
-      border-color: rgba(255, 80, 100, 0.45);
-    }
-
-    .back-btn {
-      margin-top: 14px;
-      padding: 11px 36px;
-      background: transparent;
-      color: #00e5ff;
-      text-decoration: none;
-      border-radius: 24px;
+      gap: 12px;
+      margin-bottom: 12px;
       font-weight: bold;
       font-size: 14px;
-      border: 1.5px solid #00e5ff;
-      box-shadow: 0 0 14px rgba(0, 229, 255, 0.25);
+    }
+    input[type="range"] {
+      flex: 1;
+      accent-color: #00c2ff;
+    }
+    .toggle {
+      appearance: none;
+      width: 48px; height: 28px;
+      border-radius: 14px;
+      background: #c8d8e8;
+      position: relative;
       cursor: pointer;
-      display: inline-block;
-      text-align: center;
-      letter-spacing: 1px;
-      transition: box-shadow 0.2s, background 0.15s;
+      border: 2px solid #8aa;
+      transition: background 0.15s;
     }
+    .toggle:checked { background: #3ddc84; border-color: #1a8a50; }
+    .toggle::after {
+      content: "";
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      transition: left 0.15s;
+    }
+    .toggle:checked::after { left: 22px; }
 
-    .back-btn:hover {
-      box-shadow: 0 0 22px rgba(0, 229, 255, 0.45);
-      background: rgba(0, 229, 255, 0.08);
-    }
   </style>
 </head>
 <body>
+  <div class="pop-wrap">
+    <div class="pop-header">
+      <h1>❓ 遊び方</h1>
+      <div class="sub">線を描いて障害物を乗り越えろ！</div>
+    </div>
+    <div class="pop-body">
+      <div class="pop-card">
+        <div class="howto-step">
+          <div class="howto-num">1</div>
+          <div class="howto-text"><strong>画面をスワイプ</strong>して線を描こう。キャラはその線の上を走れるよ。</div>
+        </div>
+        <div class="howto-step">
+          <div class="howto-num">2</div>
+          <div class="howto-text"><strong>穴・壁・トゲ・レーザー</strong>に注意！うまく線で橋をかけたり避けたりしよう。</div>
+        </div>
+        <div class="howto-step">
+          <div class="howto-num">3</div>
+          <div class="howto-text"><strong>ステージ</strong>はゴールまで届いたらクリア。<strong>スコアアタック</strong>はどこまで走れるかに挑戦！</div>
+        </div>
+        <div class="howto-step">
+          <div class="howto-num">4</div>
+          <div class="howto-text">夜空エリアでは途中で<strong>能力選択</strong>ができるよ。ワープ・復活・時間停止をうまく使おう。</div>
+        </div>
+      </div>
 
-  <h1>HOW TO PLAY</h1>
-
-  <div class="howto-container">
-    <div class="rule-section">
-      <h2>✏️ 線を描いて進もう</h2>
-      <p>画面をドラッグすると、プレイヤーの足場になる線を描くことができます。線を上手に使って、大きな穴や障害物を乗り越えましょう！</p>
-    </div>
-    <div class="rule-section">
-      <h2>⚠️ インクの制限とクールダウン</h2>
-      <p>一度に描ける線の長さには制限があります。使い切って線をリリースした後は、少しの間（約0.5秒間）クールダウンが発生するのでタイミングが重要です。</p>
-    </div>
-    <div class="rule-section">
-      <h2>❄️ リングでインクの色（効果）を変えよう</h2>
-      <p>ステージ上に登場する巨大なリング（青や水色）を通過すると、インクの種類が変化します。<br>
-      ・<strong>通常インク</strong>：標準的な足場になります。<br>
-      ・<strong>アイスインク</strong>：ツルツル滑る代わりに、スピードがアップして一気に加速できます！</p>
-    </div>
-    <div class="rule-section">
-      <h2>🚀 ワープアイテムを駆使しよう</h2>
-      <p>紫色のワープアイテムに触れると、最大3個までアイテムをストックできます。右下の丸い「🚀WARP」ボタンをタップすると、ストックを1つ消費して前方に一瞬でワープし、ピンチを切り抜けられます！</p>
-    </div>
-    <div class="rule-section">
-      <h2>🔄 重力反転ゾーン</h2>
-      <p>スコアが進むと「GRAVITY」の警告とともに重力が上下に反転します！天井が床になったり、上下から罠が迫ってくる初見殺しに気をつけましょう。</p>
-    </div>
-    <div class="rule-section">
-      <h2>💀 障害物とゲームオーバー</h2>
-      <p>壁や動くトゲ、隠しトゲなどの障害物にぶつかったり、画面外（上下の落下）に落ちてしまうとゲームオーバーになります。また、プレイヤーが長時間止まってしまうと強制ゲームオーバーになるので常に前へ進み続けましょう！</p>
-    </div>
-  </div>
-
-  <div class="se-settings">
-    <div class="se-settings-title">EFFECT SOUND</div>
-    <div class="se-setting-row">
-      <span class="se-label">音量</span>
-      <input id="se-volume" type="range" min="0" max="100" step="1" value="28" aria-label="効果音の音量">
-      <span id="se-volume-value">28%</span>
-    </div>
-    <div class="se-setting-row">
-      <span class="se-label">効果音</span>
-      <button id="se-toggle" type="button">ON</button>
+      <div class="pop-card">
+        <div class="howto-text">音量などの設定はタイトル画面右上の <strong>⚙</strong> から変更できます。</div>
+      </div>
+      <div class="pop-footer">
+        <a class="pop-btn" href="index.html">← タイトルへ</a>
+      </div>
     </div>
   </div>
-
-  <a href="index.html" class="back-btn menu-btn">BACK</a>
-
-  <audio id="setting-bgm" src="title.mp3" loop></audio>
-  <audio id="sfx-button" src="sfx_button.mp3" preload="auto"></audio>
-
-  <script>
-    function adjustScale() {
-      const scale = Math.min(window.innerWidth / 400, window.innerHeight / 700);
-      document.body.style.transform = `scale(${scale > 1 ? 1 : scale})`;
-    }
-    window.addEventListener("load", adjustScale);
-    window.addEventListener("resize", adjustScale);
-
-    const settingBgm = document.getElementById("setting-bgm");
-    const sfxButton = document.getElementById("sfx-button");
-    const seVolume = document.getElementById("se-volume");
-    const seVolumeValue = document.getElementById("se-volume-value");
-    const seToggle = document.getElementById("se-toggle");
-
-    const savedVolume = localStorage.getItem("drawRunBgmVolume");
-    const savedPlayState = localStorage.getItem("drawRunBgmPlaying");
-    const savedCurrentTime = localStorage.getItem("drawRunBgmCurrentTime");
-    let isPlaying = savedPlayState !== "false";
-
-    if (savedVolume !== null) settingBgm.volume = savedVolume / 100;
-    else settingBgm.volume = 0.5;
-    if (savedCurrentTime !== null) settingBgm.currentTime = parseFloat(savedCurrentTime);
-    if (isPlaying) settingBgm.play().catch(() => {});
-    else settingBgm.pause();
-
-    window.addEventListener("beforeunload", () => {
-      localStorage.setItem("drawRunBgmCurrentTime", settingBgm.currentTime);
-    });
-
-    function getHowtoSeValue(key) {
-      try {
-        const localValue = localStorage.getItem(key);
-        if (localValue !== null) return localValue;
-      } catch (e) {}
-      try {
-        const sessionValue = sessionStorage.getItem(key);
-        if (sessionValue !== null) return sessionValue;
-      } catch (e) {}
-      return null;
-    }
-
-    function saveHowtoSeValue(key, value) {
-      const stringValue = String(value);
-      try { localStorage.setItem(key, stringValue); } catch (e) {}
-      try { sessionStorage.setItem(key, stringValue); } catch (e) {}
-    }
-
-    let seEnabled = getHowtoSeValue("drawRunSeEnabled") !== "false";
-    let seCurrentVolume = Number(getHowtoSeValue("drawRunSeVolume"));
-    if (!Number.isFinite(seCurrentVolume)) seCurrentVolume = 28;
-    seCurrentVolume = Math.max(0, Math.min(100, Math.round(seCurrentVolume)));
-
-    seVolume.value = String(seCurrentVolume);
-    seVolumeValue.textContent = `${seCurrentVolume}%`;
-
-    function updateSeToggle() {
-      seToggle.textContent = seEnabled ? "ON" : "OFF";
-      seToggle.classList.toggle("on", seEnabled);
-      seToggle.classList.toggle("off", !seEnabled);
-      seVolume.disabled = !seEnabled;
-      saveHowtoSeValue("drawRunSeEnabled", seEnabled ? "true" : "false");
-    }
-
-    function updateSeVolume() {
-      seCurrentVolume = Math.max(0, Math.min(100, Math.round(Number(seVolume.value))));
-      seVolume.value = String(seCurrentVolume);
-      seVolumeValue.textContent = `${seCurrentVolume}%`;
-      saveHowtoSeValue("drawRunSeVolume", String(seCurrentVolume));
-      if (sfxButton) sfxButton.volume = seCurrentVolume / 100;
-    }
-
-    function playButtonSfx() {
-      if (!sfxButton || !seEnabled || seCurrentVolume <= 0) return;
-      sfxButton.volume = seCurrentVolume / 100;
-      sfxButton.currentTime = 0;
-      const promise = sfxButton.play();
-      if (promise && typeof promise.catch === "function") {
-        promise.catch(() => {});
-      }
-    }
-
-    updateSeToggle();
-    updateSeVolume();
-
-    seVolume.addEventListener("input", updateSeVolume);
-    seToggle.addEventListener("click", () => {
-      seEnabled = !seEnabled;
-      updateSeToggle();
-      if (seEnabled) playButtonSfx();
-    });
-
-    document.querySelectorAll(".menu-btn").forEach((btn) => {
-      btn.addEventListener("pointerdown", () => playButtonSfx());
-      btn.addEventListener("click", (e) => {
-        if (e.detail === 0) playButtonSfx();
-        if (btn.tagName === "A") {
-          e.preventDefault();
-          const targetUrl = btn.href;
-          setTimeout(() => { window.location.href = targetUrl; }, 250);
-        }
-      });
-    });
-  </script>
+  <script></script>
 </body>
 </html>
