@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>DRAW RUN</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #111;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    #game-container {
+      position: absolute;
+      width: 400px;
+      height: 700px;
+      transform-origin: center center;
+      overflow: hidden;
+    }
+
+    #gameCanvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    #fade-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+      pointer-events: none;
+      z-index: 100;
+      clip-path: circle(0% at 50% 50%);
+      transition: clip-path 0.6s ease-in-out;
+    }
+
+    #fade-overlay.fade-in {
+      clip-path: circle(150% at 50% 50%);
+    }
+
+    #fade-overlay.circle-expand {
+      clip-path: circle(150% at 50% 50%);
+      transition: clip-path 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #gravity-warning {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 15px;
+      font-weight: bold;
+      color: #ff0080;
+      text-align: center;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+      pointer-events: none;
+      z-index: 5;
+      white-space: nowrap;
+      transition: opacity 0.1s;
+    }
+
+    #gravity-warning.hidden {
+      opacity: 0;
+    }
+
+    #countdown-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(10, 5, 30, 0.55) 0%, rgba(0, 0, 0, 0.75) 100%);
+      z-index: 19;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+    }
+    #countdown-overlay.visible {
+      display: block;
+      opacity: 1;
+    }
+
+    #countdown-display {
+      display: none;
+      position: absolute;
+      top: 42%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 20;
+      pointer-events: none;
+      text-align: center;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    #countdown-display.visible {
+      display: flex;
+    }
+
+    #countdown-number {
+      font-size: 92px;
+      font-weight: 900;
+      line-height: 1;
+      color: #fff;
+      letter-spacing: 2px;
+      text-shadow:
+        0 0 12px rgba(255, 0, 128, 0.95),
+        0 0 40px rgba(255, 0, 128, 0.55),
+        0 4px 0 rgba(0, 0, 0, 0.35);
+      animation: cd-pop 0.55s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+    }
+    #countdown-number.cd-3 { color: #ff6b9d; }
+    #countdown-number.cd-2 { color: #ffc14d; }
+    #countdown-number.cd-1 { color: #5cffb0; }
+    #countdown-number.cd-go {
+      color: #00ffe0;
+      font-size: 78px;
+      letter-spacing: 6px;
+      text-shadow:
+        0 0 16px rgba(0, 255, 224, 0.95),
+        0 0 48px rgba(0, 200, 255, 0.65),
+        0 4px 0 rgba(0, 0, 0, 0.35);
+      animation: cd-go 0.7s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+    }
+
+    #countdown-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 140px;
+      height: 140px;
+      margin: -70px 0 0 -70px;
+      border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 0 0 0 rgba(255, 0, 128, 0.45);
+      animation: cd-ring 0.9s ease-out both;
+      pointer-events: none;
+      z-index: 19;
+      display: none;
+    }
+    #countdown-ring.visible { display: block; }
+
+    #countdown-sub {
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 3px;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
+      text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+      animation: cd-fade 0.5s ease both;
+    }
+
+    @keyframes cd-pop {
+      0%   { transform: scale(0.2); opacity: 0; filter: blur(6px); }
+      55%  { transform: scale(1.18); opacity: 1; filter: blur(0); }
+      100% { transform: scale(1); opacity: 1; filter: blur(0); }
+    }
+    @keyframes cd-go {
+      0%   { transform: scale(0.4) rotate(-6deg); opacity: 0; }
+      50%  { transform: scale(1.25) rotate(2deg); opacity: 1; }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+    @keyframes cd-ring {
+      0%   { transform: scale(0.4); opacity: 0.9; box-shadow: 0 0 0 0 rgba(255, 0, 128, 0.5); }
+      100% { transform: scale(1.6); opacity: 0; box-shadow: 0 0 0 28px rgba(255, 0, 128, 0); }
+    }
+    @keyframes cd-fade {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    #start-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('start-bg.png');
+      background-size: 100% 100%;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-color: #000;
+      z-index: 10;
+      transition: opacity 0.5s ease;
+    }
+
+    #start-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .menu-btn {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      background: none; 
+      border: none;       
+      cursor: pointer;
+      padding: 0;
+      transition: transform 0.1s, filter 0.2s;
+      text-decoration: none; 
+      display: block;
+    }
+
+    .menu-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .menu-btn:hover {
+      transform: translate(-50%, -50%) scale(1.05);
+      filter: brightness(1.15);
+    }
+
+    .menu-btn:active {
+      transform: translate(-50%, -50%) scale(0.95);
+    }
+
+    /* ボタン配置 */
+    #start-button { top: 64%; left: 50%; width: 240px; height: 55px; }
+    #score-attack-button {
+      top: 73.5%;
+      left: 50%;
+      width: 200px;
+      height: 42px;
+      transform: translate(-50%, -50%);
+      border: 1.5px solid #00e5ff;
+      background: rgba(0, 30, 50, 0.85);
+      color: #00e5ff;
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      border-radius: 22px;
+      cursor: pointer;
+      box-shadow: 0 0 14px rgba(0, 229, 255, 0.3);
+      z-index: 11;
+      padding: 0;
+    }
+    #score-attack-button:hover {
+      background: rgba(0, 50, 80, 0.9);
+      box-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+    }
+    #score-attack-button:active {
+      transform: translate(-50%, -50%) scale(0.96);
+    }
+    #ranking-button { top: 86%; left: 30%; width: 90px; height: 90px; }
+    #custom-button { top: 86%; left: 50%; width: 90px; height: 90px; }
+    #howto-button { top: 86%; left: 70%; width: 90px; height: 90px; }
+
+    /* ===== マップ風ステージ選択 ===== */
+    #mode-select-screen,
+    #sub-select-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 15;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 16px;
+      box-sizing: border-box;
+      background:
+        radial-gradient(ellipse at 20% 15%, rgba(0, 180, 255, 0.08) 0%, transparent 45%),
+        radial-gradient(ellipse at 80% 80%, rgba(80, 40, 160, 0.12) 0%, transparent 50%),
+        linear-gradient(180deg, #070b16 0%, #0c1224 50%, #0a1020 100%);
+    }
+
+    #sub-select-screen {
+      z-index: 16;
+    }
+
+    #mode-select-screen.visible,
+    #sub-select-screen.visible {
+      display: flex;
+    }
+
+    #mode-select-title,
+    #sub-select-title {
+      color: #fff;
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: 4px;
+      text-shadow:
+        0 0 12px rgba(0, 229, 255, 0.7),
+        0 0 28px rgba(0, 180, 255, 0.35);
+      margin-bottom: 4px;
+      flex-shrink: 0;
+    }
+
+    #mode-select-subtitle {
+      color: rgba(180, 210, 240, 0.5);
+      font-size: 11px;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    /* スコアアタック（マップ上部の別ルート） */
+    .map-score-btn {
+      width: 200px;
+      height: 42px;
+      border: 1.5px solid #00e5ff;
+      background: rgba(0, 30, 50, 0.7);
+      color: #00e5ff;
+      font-size: 14px;
+      font-weight: bold;
+      border-radius: 22px;
+      cursor: pointer;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+      box-shadow: 0 0 16px rgba(0, 229, 255, 0.3);
+      transition: transform 0.15s, box-shadow 0.2s, background 0.15s;
+      flex-shrink: 0;
+    }
+    .map-score-btn:hover {
+      transform: scale(1.05);
+      background: rgba(0, 50, 80, 0.75);
+      box-shadow: 0 0 24px rgba(0, 229, 255, 0.5);
+    }
+
+    /* マップ本体（スクロール可能） */
+    .stage-map {
+      position: relative;
+      width: 100%;
+      max-width: 360px;
+      flex: 1;
+      min-height: 0;
+      margin-bottom: 8px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+    /* スクロールバー（見やすく） */
+    .stage-map::-webkit-scrollbar {
+      width: 6px;
+    }
+    .stage-map::-webkit-scrollbar-thumb {
+      background: rgba(0, 229, 255, 0.4);
+      border-radius: 3px;
+    }
+    .stage-map-inner {
+      position: relative;
+      width: 100%;
+      min-height: 100%;
+      padding-bottom: 8px;
+      box-sizing: border-box;
+    }
+
+    /* 道（縦のパス）※クリックを邪魔しない */
+    .map-path {
+      position: absolute;
+      left: 50%;
+      top: 56px;
+      bottom: 56px;
+      width: 4px;
+      transform: translateX(-50%);
+      background: linear-gradient(180deg,
+        rgba(0, 180, 255, 0.15),
+        rgba(0, 200, 255, 0.45),
+        rgba(80, 140, 255, 0.4),
+        rgba(0, 220, 180, 0.3)
+      );
+      border-radius: 2px;
+      box-shadow: 0 0 10px rgba(0, 200, 255, 0.25);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* サブ用の横パス */
+    .map-path-h {
+      position: absolute;
+      top: 50%;
+      left: 36px;
+      right: 36px;
+      height: 4px;
+      transform: translateY(-50%);
+      background: linear-gradient(90deg,
+        rgba(255, 0, 128, 0.3),
+        rgba(0, 200, 255, 0.6),
+        rgba(0, 255, 150, 0.4)
+      );
+      border-radius: 2px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .map-nodes {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 36px;
+      padding: 20px 0 36px;
+      box-sizing: border-box;
+      z-index: 2;
+      min-height: min-content;
+      pointer-events: none;
+    }
+    .map-nodes .map-node {
+      pointer-events: auto;
+      flex-shrink: 0;
+    }
+
+    .map-nodes-h {
+      flex-direction: row;
+      justify-content: center;
+      gap: 28px;
+      padding: 24px 16px;
+      align-items: center;
+      min-height: 120px;
+    }
+
+    /* ノード（ステージ地点） */
+    .map-node {
+      position: relative;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 3px solid #00c8ff;
+      background: radial-gradient(circle at 35% 30%, #1a2a48, #0c1528 70%);
+      color: #fff;
+      font-weight: bold;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.15;
+      box-shadow:
+        0 0 0 4px rgba(0,0,0,0.35),
+        0 0 16px rgba(255, 0, 128, 0.35);
+      transition: transform 0.15s, box-shadow 0.2s, border-color 0.2s;
+      z-index: 2;
+      padding: 0;
+    }
+    .map-node:hover {
+      transform: scale(1.12);
+      box-shadow:
+        0 0 0 4px rgba(0,0,0,0.35),
+        0 0 24px rgba(255, 0, 128, 0.65);
+    }
+    .map-node:active {
+      transform: scale(0.96);
+    }
+    .map-node .node-label {
+      font-size: 10px;
+      opacity: 0.7;
+      font-weight: normal;
+    }
+    .map-node .node-num {
+      font-size: 16px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ステージごとの色分け */
+    .map-node[data-main="1"] { border-color: #5cff8d; box-shadow: 0 0 0 4px rgba(0,0,0,0.35), 0 0 14px rgba(92,255,141,0.35); }
+    .map-node[data-main="2"] { border-color: #ffb84d; box-shadow: 0 0 0 4px rgba(0,0,0,0.35), 0 0 14px rgba(255,184,77,0.35); }
+    .map-node[data-main="3"] { border-color: #7b8cff; box-shadow: 0 0 0 4px rgba(0,0,0,0.35), 0 0 14px rgba(123,140,255,0.35); }
+    .map-node[data-main="4"] { border-color: #ff4d9a; box-shadow: 0 0 0 4px rgba(0,0,0,0.35), 0 0 14px rgba(255,77,154,0.4); }
+
+    .map-node[data-main="1"]:hover { box-shadow: 0 0 0 4px rgba(0,0,0,0.35), 0 0 22px rgba(92,255,141,0.6); }
+    .map-node[data-main="2"]:hover { box-shadow: 0 0 0 4px rgba(0,0,0,0.35), 0 0 22px rgba(255,184,77,0.6); }
+    .map-node[data-main="3"]:hover { box-shadow: 0 0 0 4px rgba(0,0,0,0.35), 0 0 22px rgba(123,140,255,0.6); }
+    .map-node[data-main="4"]:hover { box-shadow: 0 0 0 4px rgba(0,0,0,0.35), 0 0 22px rgba(255,77,154,0.65); }
+    .map-node[data-main="5"] { border-color: #ff6633; box-shadow: 0 0 0 4px rgba(0,0,0,0.35), 0 0 14px rgba(255,102,51,0.4); }
+    .map-node[data-main="6"] { border-color: #a78bfa; box-shadow: 0 0 0 4px rgba(0,0,0,0.35), 0 0 14px rgba(167,139,250,0.4); }
+    .map-node[data-main="5"]:hover { box-shadow: 0 0 0 4px rgba(0,0,0,0.35), 0 0 22px rgba(255,102,51,0.65); }
+    .map-node[data-main="6"]:hover { box-shadow: 0 0 0 4px rgba(0,0,0,0.35), 0 0 22px rgba(167,139,250,0.65); }
+
+    /* サブノード */
+    .map-node.sub {
+      width: 64px;
+      height: 64px;
+      font-size: 15px;
+    }
+
+    /* 未解放 */
+    .map-node.locked {
+      border-color: #444 !important;
+      background: radial-gradient(circle at 35% 30%, #2a2a2a, #151515 70%) !important;
+      color: #666 !important;
+      box-shadow: 0 0 0 4px rgba(0,0,0,0.35) !important;
+      cursor: not-allowed;
+      filter: grayscale(0.8);
+    }
+    .map-node.locked:hover {
+      transform: none;
+      box-shadow: 0 0 0 4px rgba(0,0,0,0.35) !important;
+    }
+    .map-node.locked::after {
+      content: "🔒";
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      font-size: 14px;
+      filter: none;
+    }
+
+    /* クリア済み */
+    .map-node.cleared:not(.locked)::before {
+      content: "✓";
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #2ecc71;
+      color: #fff;
+      font-size: 12px;
+      line-height: 20px;
+      text-align: center;
+      box-shadow: 0 0 6px rgba(46, 204, 113, 0.6);
+    }
+
+    /* 装飾用の小さな星・点 */
+    .map-deco {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.35);
+      pointer-events: none;
+    }
+
+    /* 旧テキスト戻るボタン用スタイルは img-btn に統一したため削除 */
+
+
+
+    /* ===== ワールド地図（風景＋地点） ===== */
+    .world-shell {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 4px;
+      width: 100%;
+      max-width: 400px;
+      flex: 0 0 auto;
+      min-height: 0;
+      margin: 2px 0 0;
+      padding: 0 4px;
+      box-sizing: border-box;
+    }
+    .world-nav {
+      width: 32px;
+      align-self: center;
+      height: 40px;
+      border-radius: 10px;
+      border: 1.5px solid rgba(0, 229, 255, 0.5);
+      background: rgba(0, 30, 55, 0.75);
+      color: #00e5ff;
+      font-size: 15px;
+      cursor: pointer;
+      flex-shrink: 0;
+      box-shadow: 0 0 10px rgba(0, 200, 255, 0.2);
+    }
+    .world-nav:disabled { opacity: 0.3; cursor: default; }
+    .world-main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .world-banner { text-align: center; flex-shrink: 0; }
+    .world-tag {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: rgba(0, 229, 255, 0.75);
+      font-weight: bold;
+    }
+    .world-name {
+      display: block;
+      font-size: 16px;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: 2px;
+      text-shadow: 0 0 12px rgba(0, 200, 255, 0.45);
+    }
+
+    .world-map-viewport {
+      flex: 0 0 auto;
+      height: 250px;
+      min-height: 250px;
+      max-height: 250px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      border-radius: 14px;
+      border: 1.5px solid rgba(0, 200, 255, 0.3);
+      box-shadow: 0 0 20px rgba(0, 160, 255, 0.12);
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x;
+      cursor: grab;
+      background: #0a1525;
+    }
+    .world-map-viewport:active {
+      cursor: grabbing;
+    }
+    .world-map-viewport::-webkit-scrollbar { height: 5px; }
+    .world-map-viewport::-webkit-scrollbar-thumb {
+      background: rgba(0, 229, 255, 0.4);
+      border-radius: 3px;
+    }
+
+    .world-map-canvas {
+      position: relative;
+      width: 640px; /* 横に広いマップ → スクロール */
+      height: 100%;
+      min-height: 200px;
+      background-color: #1a3040;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    /* 画像が無いときの簡易グラデ（ワールド色） */
+    .world-map-canvas[data-main="1"] { background-image: linear-gradient(180deg, #7ec8ff 0%, #5cb85c 45%, #3d8b3d 100%); }
+    .world-map-canvas[data-main="2"] { background-image: linear-gradient(180deg, #ffb347 0%, #e07a3a 45%, #6b3a2a 100%); }
+    .world-map-canvas[data-main="3"] { background-image: linear-gradient(180deg, #1a1040 0%, #2a2060 40%, #0a0818 100%); }
+    .world-map-canvas[data-main="4"] { background-image: linear-gradient(180deg, #0a2030 0%, #103050 40%, #201030 100%); }
+    .world-map-canvas[data-main="5"] { background-image: linear-gradient(180deg, #3a1010 0%, #8b2500 50%, #1a0800 100%); }
+    .world-map-canvas[data-main="6"] { background-image: linear-gradient(180deg, #050510 0%, #1a0a30 50%, #0a1020 100%); }
+
+    .world-map-path {
+      position: absolute;
+      left: 12%;
+      right: 12%;
+      top: 50%;
+      height: 6px;
+      transform: translateY(-50%);
+      background: repeating-linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.85) 0 10px,
+        rgba(255, 255, 255, 0.15) 10px 18px
+      );
+      border-radius: 3px;
+      box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.9;
+    }
+
+    .map-spot {
+      position: absolute;
+      width: 44px;
+      height: 44px;
+      margin-left: -22px;
+      margin-top: -22px;
+      border: none;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+      z-index: 2;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* 丸マーカーは非表示（名所画像を本体にする） */
+    .spot-ring {
+      display: none !important;
+    }
+    .map-spot {
+      width: 88px;
+      height: 88px;
+      margin-left: -44px;
+      margin-top: -44px;
+    }
+    .spot-landmark {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -55%);
+      width: 84px;
+      height: 84px;
+      object-fit: contain;
+      pointer-events: none;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+      z-index: 1;
+      display: none;
+    }
+    .map-spot.has-landmark .spot-landmark {
+      display: block;
+    }
+    .map-spot.selected .spot-landmark {
+      filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.7)) drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+      transform: translate(-50%, -55%) scale(1.08);
+    }
+    .map-spot.locked .spot-landmark {
+      filter: grayscale(0.75) brightness(0.7);
+      opacity: 0.75;
+    }
+    .map-spot.cleared .spot-landmark {
+      filter: drop-shadow(0 0 6px rgba(255, 220, 80, 0.55)) drop-shadow(0 4px 6px rgba(0,0,0,0.35));
+    }
+    /* 選択中キャラ */
+    .map-char {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      margin-left: -20px;
+      margin-top: -48px;
+      object-fit: contain;
+      pointer-events: none;
+      z-index: 5;
+      display: none;
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
+      transition: left 0.25s ease, top 0.25s ease;
+    }
+    .map-char.visible {
+      display: block;
+      animation: char-bounce 0.45s ease;
+    }
+    @keyframes char-bounce {
+      0% { transform: translateY(8px); opacity: 0; }
+      60% { transform: translateY(-4px); opacity: 1; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
+    .spot-label {
+      display: block;
+      margin-top: 2px;
+      font-size: 10px;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+      letter-spacing: 0.5px;
+    }
+    .map-spot.locked::after {
+      content: "🔒";
+      position: absolute;
+      top: -4px;
+      right: -2px;
+      font-size: 12px;
+    }
+
+    .map-deco-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+    .map-path-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .world-map-canvas {
+      position: relative;
+      width: 640px;
+      height: 100%;
+      min-height: 210px;
+      background-color: #1a3040;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    /* 装飾パーツ共通 */
+    .deco {
+      position: absolute;
+      pointer-events: none;
+    }
+    .deco-tree {
+      width: 0; height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-bottom: 28px solid #2d8a3e;
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.25));
+    }
+    .deco-tree::after {
+      content: "";
+      position: absolute;
+      left: -4px; top: 24px;
+      width: 8px; height: 10px;
+      background: #6b3e1a;
+    }
+    .deco-bush {
+      width: 28px; height: 16px;
+      background: #3cb05a;
+      border-radius: 50% 50% 40% 40%;
+      box-shadow: 12px 4px 0 #2e9a48, -10px 3px 0 #36a850;
+    }
+    .deco-cloud {
+      width: 40px; height: 16px;
+      background: rgba(255,255,255,0.85);
+      border-radius: 20px;
+      box-shadow: 14px 4px 0 rgba(255,255,255,0.8), -12px 2px 0 rgba(255,255,255,0.75);
+      opacity: 0.9;
+    }
+    .deco-house {
+      width: 36px; height: 28px;
+      background: #e8d5a3;
+      border: 2px solid rgba(0,0,0,0.2);
+      border-radius: 2px 2px 0 0;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+    }
+    .deco-house::before {
+      content: "";
+      position: absolute;
+      left: -6px; top: -16px;
+      border-left: 24px solid transparent;
+      border-right: 24px solid transparent;
+      border-bottom: 18px solid #c45c3a;
+    }
+    .deco-house::after {
+      content: "";
+      position: absolute;
+      left: 12px; bottom: 0;
+      width: 10px; height: 14px;
+      background: #6b3e1a;
+    }
+    .deco-castle {
+      width: 48px; height: 44px;
+      background: linear-gradient(180deg, #c8c8d0, #8a8a98);
+      border: 2px solid rgba(0,0,0,0.25);
+      border-radius: 2px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    .deco-castle::before {
+      content: "";
+      position: absolute;
+      left: 8px; top: -18px;
+      width: 28px; height: 20px;
+      background: #a0a0b0;
+      border: 2px solid rgba(0,0,0,0.2);
+      clip-path: polygon(0 100%, 0 35%, 20% 35%, 20% 0, 40% 0, 40% 35%, 60% 35%, 60% 0, 80% 0, 80% 35%, 100% 35%, 100% 100%);
+    }
+    .deco-castle::after {
+      content: "";
+      position: absolute;
+      left: 18px; bottom: 0;
+      width: 12px; height: 16px;
+      background: #3a3050;
+    }
+    .deco-pipe {
+      width: 26px; height: 34px;
+      background: linear-gradient(90deg, #2ecc71, #27ae60 40%, #1e8449);
+      border-radius: 4px 4px 2px 2px;
+      border: 2px solid rgba(0,0,0,0.2);
+      box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+    }
+    .deco-pipe::before {
+      content: "";
+      position: absolute;
+      left: -4px; top: -6px;
+      width: 30px; height: 12px;
+      background: linear-gradient(90deg, #58d68d, #27ae60);
+      border-radius: 4px;
+      border: 2px solid rgba(0,0,0,0.15);
+    }
+    .deco-mushroom {
+      width: 22px; height: 12px;
+      background: #e74c3c;
+      border-radius: 12px 12px 2px 2px;
+      box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15);
+    }
+    .deco-mushroom::after {
+      content: "";
+      position: absolute;
+      left: 7px; top: 10px;
+      width: 8px; height: 10px;
+      background: #f5e6c8;
+      border-radius: 0 0 2px 2px;
+    }
+    .deco-star {
+      width: 14px; height: 14px;
+      background: #ffe566;
+      clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+      filter: drop-shadow(0 0 4px rgba(255, 220, 80, 0.7));
+    }
+    .deco-rock {
+      width: 30px; height: 18px;
+      background: #7a7a7a;
+      border-radius: 40% 40% 20% 20%;
+      box-shadow: 8px 4px 0 #5a5a5a;
+    }
+    .deco-crystal {
+      width: 16px; height: 28px;
+      background: linear-gradient(180deg, #a78bfa, #5b21b6);
+      clip-path: polygon(50% 0%, 100% 40%, 80% 100%, 20% 100%, 0% 40%);
+      opacity: 0.85;
+      filter: drop-shadow(0 0 6px rgba(167, 139, 250, 0.5));
+    }
+    .deco-lava {
+      width: 50px; height: 14px;
+      background: linear-gradient(90deg, #ff4400, #ff8800, #ff4400);
+      border-radius: 8px;
+      opacity: 0.85;
+      box-shadow: 0 0 10px rgba(255, 80, 0, 0.5);
+    }
+    .deco-cyber {
+      width: 20px; height: 20px;
+      border: 2px solid #00e5ff;
+      box-shadow: 0 0 8px rgba(0, 229, 255, 0.5), inset 0 0 6px rgba(0, 229, 255, 0.3);
+      transform: rotate(45deg);
+    }
+    .deco-flag {
+      width: 4px; height: 28px;
+      background: #ddd;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.15);
+    }
+    .deco-flag::after {
+      content: "";
+      position: absolute;
+      left: 4px; top: 2px;
+      width: 16px; height: 10px;
+      background: #ff4d6d;
+      clip-path: polygon(0 0, 100% 50%, 0 100%);
+    }
+
+    /* マップ入場演出 */
+    #mode-select-screen.visible {
+      animation: mode-screen-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    @keyframes mode-screen-in {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    #mode-select-screen.map-enter .world-map-viewport {
+      animation: map-reveal 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    @keyframes map-reveal {
+      0% { opacity: 0; transform: translateY(18px) scale(0.96); filter: blur(4px); }
+      100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    }
+    .map-spot {
+      animation: spot-pop 0.45s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+    }
+    .map-spot[data-sub="1"] { animation-delay: 0.2s; }
+    .map-spot[data-sub="2"] { animation-delay: 0.35s; }
+    .map-spot[data-sub="3"] { animation-delay: 0.5s; }
+    @keyframes spot-pop {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+
+    /* challenge / back は .img-btn で画像表示 */
+    .challenge-btn.img-btn,
+    #mode-back-btn.img-btn {
+      border: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      color: inherit;
+      padding: 0;
+      width: auto;
+      height: auto;
+      border-radius: 0;
+      margin: 0;
+    }
+    .world-hint {
+      font-size: 10px;
+      color: rgba(180, 210, 240, 0.5);
+      text-align: center;
+      flex-shrink: 0;
+      min-height: 0;
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    .img-btn {
+      position: relative;
+      border: none;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+      line-height: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .img-btn img {
+      display: block;
+      height: 40px;
+      width: auto;
+      max-width: 130px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35));
+      transition: transform 0.1s, filter 0.15s;
+    }
+    .img-btn:not(:disabled):active img {
+      transform: scale(0.95);
+    }
+    .img-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.4;
+      filter: grayscale(0.5);
+    }
+    .img-btn .img-btn-fallback {
+      display: none;
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: 1.5px solid #00e5ff;
+      background: rgba(0, 40, 70, 0.85);
+      color: #00e5ff;
+      font-weight: bold;
+      font-size: 13px;
+    }
+    /* 画像が読めないとき文字ボタンに切り替え（JSでも可） */
+    .img-btn.no-img img { display: none; }
+    .img-btn.no-img .img-btn-fallback { display: inline-block; }
+
+    .world-selected {
+      text-align: center;
+      font-size: 11px;
+      color: rgba(200, 225, 245, 0.9);
+      font-weight: bold;
+      min-height: 1em;
+      flex-shrink: 0;
+      margin: 2px 0 0;
+    }
+    .world-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-shrink: 0;
+      padding: 0;
+      margin: 0;
+    }
+
+    /* ステージ名プレート */
+    .spot-plate {
+      position: absolute;
+      left: 50%;
+      top: 100%;
+      transform: translateX(-50%);
+      margin-top: 2px;
+      min-width: 56px;
+      max-width: 88px;
+      padding: 2px 4px;
+      background: url("ui_plate.png") center / 100% 100% no-repeat,
+                  linear-gradient(180deg, #f5e6c8, #e0c9a0);
+      border: 2px solid #8b6914;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.35);
+      pointer-events: none;
+      z-index: 3;
+    }
+    .spot-plate .plate-title {
+      display: block;
+      font-size: 7px;
+      font-weight: bold;
+      color: #3a2a10;
+      text-align: center;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .map-spot.selected .spot-plate {
+      box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.7), 0 2px 6px rgba(0,0,0,0.4);
+    }
+
+    .world-dots {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 4px;
+      margin-top: 6px;
+      flex-shrink: 0;
+    }
+    .world-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      padding: 0;
+      cursor: pointer;
+    }
+    .world-dot.active {
+      background: #00e5ff;
+      box-shadow: 0 0 8px rgba(0, 229, 255, 0.6);
+      transform: scale(1.2);
+    }
+
+    /* 互換用（JSが .mode-btn を参照する場合がある） */
+    .mode-btn { display: none; }
+
+    /* ワープボタン（画面右下） */
+    #warp-button {
+      position: absolute;
+      right: 12px;
+      bottom: 14px;
+      width: 64px;
+      height: 64px;
+      border: 2px solid rgba(180, 100, 255, 0.8);
+      border-radius: 14px;
+      background: rgba(20, 10, 40, 0.75);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 40;
+      cursor: pointer;
+      padding: 4px;
+      box-shadow: 0 0 12px rgba(150, 80, 255, 0.35);
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    #warp-button img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      pointer-events: none;
+    }
+    #warp-button #warp-count {
+      color: #e0c0ff;
+      font-size: 12px;
+      font-weight: bold;
+      line-height: 1;
+      margin-top: 2px;
+      pointer-events: none;
+    }
+    #warp-button.disabled {
+      opacity: 0.4;
+      filter: grayscale(0.6);
+    }
+    #warp-button:not(.disabled):active {
+      transform: scale(0.92);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="countdown-overlay"></div>
+    <div id="countdown-ring"></div>
+    <div id="countdown-display">
+      <div id="countdown-number">3</div>
+      <div id="countdown-sub">GET READY</div>
+    </div>
+
+    <div id="fade-overlay"></div>
+
+    <button id="warp-button" type="button" aria-label="ワープ">
+      <img src="warp_item.png" alt="warp">
+      <span id="warp-count">0</span>
+    </button>
+
+    <div id="gravity-warning" class="hidden">
+      ⚠️ GRAVITY REVERSE! ⚠️
+    </div>
+
+    <div id="start-screen">
+      <button id="start-button" class="menu-btn"><img src="btn-start.png" alt="START"></button>
+      <button id="score-attack-button" class="menu-btn" type="button">⚡ スコアアタック</button>
+      <a href="ranking.html" id="ranking-button" class="menu-btn"><img src="btn-ranking.png" alt="RANKING"></a>
+      <a href="custom.html" id="custom-button" class="menu-btn"><img src="btn-custom.png" alt="CUSTOM"></a>
+      <a href="howto.html" id="howto-button" class="menu-btn"><img src="btn-howto.png" alt="HOW TO"></a>
+    </div>
+
+    <!-- モード選択画面（ワールドページ式マップ） -->
+    <div id="mode-select-screen">
+      <div id="mode-select-title">STAGE MAP</div>
+      <div id="mode-select-subtitle">ワールドを選んで冒険しよう</div>
+
+      <div class="world-shell">
+        <button class="world-nav" id="world-prev" type="button" aria-label="前のワールド">◀</button>
+
+        <div class="world-main">
+          <div class="world-banner">
+            <span class="world-tag" id="world-tag">WORLD 1</span>
+            <span class="world-name" id="world-name">草原エリア</span>
+          </div>
+
+          <div class="world-map-viewport" id="world-map-viewport">
+            <div class="world-map-canvas" id="world-map-canvas" data-main="1">
+              <!-- 装飾は JS でワールドごとに差し替え -->
+              <div class="map-deco-layer" id="map-deco-layer"></div>
+              <svg class="map-path-svg" id="map-path-svg" viewBox="0 0 560 240" preserveAspectRatio="none">
+                <path id="map-path-line" d="M 70 160 C 140 160, 160 90, 240 100 S 340 170, 420 130 S 500 100, 520 110"
+                  fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="5" stroke-dasharray="12 8"
+                  stroke-linecap="round"/>
+              </svg>
+              <button class="map-spot" data-sub="1" type="button" style="left:12.5%; top:62%;">
+                <img class="spot-landmark" alt="">
+                <span class="spot-ring"></span>
+                <span class="spot-label">1-1</span>
+                <span class="spot-plate"><span class="plate-title">1-1</span></span>
+              </button>
+              <button class="map-spot" data-sub="2" type="button" style="left:43%; top:38%;">
+                <img class="spot-landmark" alt="">
+                <span class="spot-ring"></span>
+                <span class="spot-label">1-2</span>
+                <span class="spot-plate"><span class="plate-title">1-2</span></span>
+              </button>
+              <button class="map-spot" data-sub="3" type="button" style="left:78%; top:42%;">
+                <img class="spot-landmark" alt="">
+                <span class="spot-ring"></span>
+                <span class="spot-label">1-3</span>
+                <span class="spot-plate"><span class="plate-title">1-3</span></span>
+              </button>
+              <img class="map-char" id="map-char" alt="player">
+            </div>
+          </div>
+
+          <div class="world-selected" id="world-selected">地点を選んでください</div>
+          <div class="world-hint" id="world-hint"></div>
+
+          <div class="world-action">
+            <button class="img-btn challenge-btn" id="challenge-btn" type="button" disabled aria-label="決定">
+              <img src="ui_btn_confirm.png" alt="決定">
+              <span class="img-btn-fallback">決定</span>
+            </button>
+            <button class="img-btn mode-back-img" id="mode-back-btn" type="button" aria-label="戻る">
+              <img src="ui_btn_back.png" alt="戻る">
+              <span class="img-btn-fallback">戻る</span>
+            </button>
+          </div>
+        </div>
+
+        <button class="world-nav" id="world-next" type="button" aria-label="次のワールド">▶</button>
+      </div>
+
+      <div class="world-dots" id="world-dots"></div>
+    </div>
+
+  </div>
+
+  <audio id="index-sfx-button" src="sfx_button.mp3" preload="auto"></audio>
+
+<script>
+    function adjustScale() {
+      const container = document.getElementById('game-container');
+      const canvas = document.getElementById('gameCanvas');
+      const designWidth = 400;  
+      const designHeight = 700; 
+      
+      canvas.width = designWidth;
+      canvas.height = designHeight;
+
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      
+      const scaleX = windowWidth / designWidth;
+      const scaleY = windowHeight / designHeight;
+      let scale = Math.min(scaleX, scaleY);
+      
+      if (scale >= 1) {
+        scale = 1;
+      }
+
+      container.style.left = "50%";
+      container.style.top = "50%";
+      container.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    }
+
+    window.addEventListener("load", adjustScale);
+    window.addEventListener("resize", adjustScale);
+
+    // ===== メニュー画面の共通SE =====
+    // game.js のグローバル変数と名前が衝突しないよう、index専用の名前を使用
+    const indexSfxButton = document.getElementById("index-sfx-button");
+
+    function indexIsSeEnabled() {
+      return (localStorage.getItem("drawRunSeEnabled") ?? sessionStorage.getItem("drawRunSeEnabled")) !== "false";
+    }
+
+    function indexGetSeVolume() {
+      const saved = localStorage.getItem("drawRunSeVolume") ?? sessionStorage.getItem("drawRunSeVolume");
+      const value = Number(saved);
+      if (!Number.isFinite(value)) return 0.28;
+      return Math.max(0, Math.min(100, value)) / 100;
+    }
+
+    function indexPlayButtonSfx() {
+      if (!indexSfxButton || !indexIsSeEnabled()) return;
+
+      const volume = indexGetSeVolume();
+      if (volume <= 0) return;
+
+      try {
+        indexSfxButton.volume = volume;
+        indexSfxButton.currentTime = 0;
+        indexSfxButton.play().catch(() => {});
+      } catch (e) {}
+    }
+
+    // スタートボタンは game.js 側で処理するため、ここでは画面遷移する3ボタンだけを処理
+    const indexLinkButtons = document.querySelectorAll("#ranking-button, #custom-button, #howto-button");
+
+    indexLinkButtons.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        indexPlayButtonSfx();
+
+        const targetUrl = btn.href;
+        setTimeout(() => {
+          window.location.href = targetUrl;
+        }, 250);
+      });
+    });
+
+  </script>
+
+  <script src="game.js"></script>
+  <!-- デバッグ用（本番ではこの行を消すか、debug.jsを置かなければ無効） -->
+  <script src="debug.js"></script>
+</body>
+</html>

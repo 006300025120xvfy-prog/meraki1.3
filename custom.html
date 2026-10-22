@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>CUSTOM - DRAW RUN</title>
+  <style>
+    html, body {
+      width: 100vw; height: 100vh; overflow: hidden; margin: 0; padding: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+      padding-top: 3vh;
+      background:
+        radial-gradient(ellipse at 20% 15%, rgba(0, 180, 255, 0.08) 0%, transparent 45%),
+        radial-gradient(ellipse at 80% 80%, rgba(80, 40, 160, 0.12) 0%, transparent 50%),
+        linear-gradient(180deg, #070b16 0%, #0c1224 50%, #0a1020 100%);
+      color: #e8f4ff; font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+    body { transform-origin: center top; }
+    h1 {
+      font-size: 26px; font-weight: 900; letter-spacing: 4px; margin: 0 0 8px 0; color: #fff;
+      text-shadow: 0 0 12px rgba(0, 229, 255, 0.7), 0 0 28px rgba(0, 180, 255, 0.35);
+    }
+    .selected-name {
+      font-size: 13px; font-weight: bold; color: #00e5ff; letter-spacing: 1px;
+      margin-bottom: 10px; text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+      min-height: 1.2em; text-align: center; padding: 0 12px;
+    }
+    .custom-container {
+      background: rgba(8, 16, 32, 0.72); border: 1.5px solid rgba(0, 200, 255, 0.25);
+      border-radius: 18px; padding: 12px 10px 14px; width: 92%; max-width: 360px;
+      max-height: 64vh; overflow-y: auto;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4), 0 0 24px rgba(0, 180, 255, 0.08);
+      box-sizing: border-box;
+    }
+    .custom-container::-webkit-scrollbar { width: 5px; }
+    .custom-container::-webkit-scrollbar-thumb { background: rgba(0, 229, 255, 0.4); border-radius: 3px; }
+    .skin-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .skin-card {
+      position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 8px 3px 6px; background: rgba(0, 30, 55, 0.45);
+      border: 1.5px solid rgba(0, 180, 255, 0.22); border-radius: 12px; cursor: pointer;
+      transition: transform 0.12s, border-color 0.15s, box-shadow 0.15s, background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .skin-card:hover:not(.locked) { border-color: rgba(0, 229, 255, 0.55); background: rgba(0, 50, 80, 0.5); }
+    .skin-card:active:not(.locked) { transform: scale(0.96); }
+    .skin-card.selected {
+      border-color: #00e5ff; background: rgba(0, 70, 100, 0.55);
+      box-shadow: 0 0 14px rgba(0, 229, 255, 0.35);
+    }
+    .skin-card.selected:not(.locked)::after {
+      content: "✓"; position: absolute; top: 3px; right: 4px; width: 15px; height: 15px;
+      border-radius: 50%; background: #00e5ff; color: #0a1525; font-size: 10px; font-weight: bold;
+      line-height: 15px; text-align: center; box-shadow: 0 0 6px rgba(0, 229, 255, 0.5);
+    }
+    .skin-card.locked {
+      filter: grayscale(0.7); opacity: 0.72; cursor: not-allowed;
+      border-color: rgba(100, 110, 130, 0.4);
+    }
+    .skin-card.locked .skin-thumb { background: #1a2233; }
+    .lock-badge {
+      position: absolute; top: 4px; left: 4px; font-size: 11px; z-index: 2;
+    }
+    .skin-thumb {
+      width: 58px; height: 58px; border-radius: 10px;
+      background: radial-gradient(circle at 50% 40%, #ffffff 0%, #e8f4ff 55%, #c8dff5 100%);
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid rgba(0, 180, 255, 0.25); overflow: hidden;
+    }
+    .skin-thumb img {
+      max-width: 85%; max-height: 85%; object-fit: contain;
+      filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.8));
+    }
+    .skin-card.locked .skin-thumb img { opacity: 0.45; }
+    .skin-label {
+      font-size: 8.5px; font-weight: bold; color: rgba(200, 225, 245, 0.85);
+      text-align: center; line-height: 1.2; max-width: 100%; overflow: hidden;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      word-break: break-all; min-height: 2.3em;
+    }
+    .skin-card.selected .skin-label { color: #7ee8ff; }
+    .unlock-hint {
+      margin-top: 10px; padding: 8px 10px; border-radius: 10px;
+      background: rgba(0, 40, 70, 0.5); border: 1px solid rgba(0, 200, 255, 0.2);
+      font-size: 11px; line-height: 1.45; color: rgba(200, 220, 240, 0.85);
+      min-height: 2.8em;
+    }
+    .unlock-hint strong { color: #00e5ff; }
+    .unlock-hint .locked-msg { color: #ffb86b; }
+    .unlock-hint .ok-msg { color: #7dffb0; }
+    .back-btn {
+      margin-top: 12px; padding: 11px 36px; background: transparent; color: #00e5ff;
+      text-decoration: none; border-radius: 24px; font-weight: bold; font-size: 14px;
+      border: 1.5px solid #00e5ff; box-shadow: 0 0 14px rgba(0, 229, 255, 0.25);
+      cursor: pointer; display: inline-block; letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <h1>SKIN</h1>
+  <div class="selected-name" id="skin-name-display">選択中: —</div>
+  <div class="custom-container">
+    <div class="skin-grid" id="skin-grid"></div>
+    <div class="unlock-hint" id="unlock-hint">キャラをタップして選択</div>
+  </div>
+  <a href="index.html" class="back-btn menu-btn">BACK</a>
+  <audio id="setting-bgm" src="title.mp3" loop></audio>
+  <audio id="sfx-button" src="sfx_button.mp3" preload="auto"></audio>
+<script>
+    function adjustScale() {
+      const scale = Math.min(window.innerWidth / 400, window.innerHeight / 700);
+      document.body.style.transform = `scale(${scale > 1 ? 1 : scale})`;
+    }
+    window.addEventListener("load", adjustScale);
+    window.addEventListener("resize", adjustScale);
+
+    const characterList = [
+      { src: "player.png", name: "クロカゲ", unlock: null },
+      { src: "player2.png", name: "ハムゾウ", unlock: null },
+      { src: "player3.png", name: "マフィン", unlock: null },
+      { src: "player4.png", name: "ロビン・ドングリ", unlock: null },
+      { src: "player5.png", name: "サー・ロデリック", unlock: null },
+      { src: "player6.png", name: "ダスティ・アイアンヒゲ", unlock: null },
+      { src: "player7.png", name: "キャプテン・バーナビー", unlock: "score200", unlockText: "スコアアタックで200m達成" },
+      { src: "player8.png", name: "ネオン・サイファー", unlock: "stage4all", unlockText: "STAGE1〜4をすべてクリア" }
+    ];
+
+    function getBestScoreAttack() {
+      let best = 0;
+      try {
+        (JSON.parse(localStorage.getItem("drawRunScores")) || []).forEach((s) => {
+          const v = typeof s === "object" && s ? Number(s.score) : Number(s);
+          if (Number.isFinite(v) && v > best) best = v;
+        });
+      } catch (e) {}
+      try {
+        const last = JSON.parse(localStorage.getItem("drawRunLastScore"));
+        if (last && Number(last.score) > best) best = Number(last.score);
+      } catch (e) {}
+      try {
+        const hi = Number(localStorage.getItem("drawRunBestScore"));
+        if (Number.isFinite(hi) && hi > best) best = hi;
+      } catch (e) {}
+      return best;
+    }
+
+    function isStage4AllCleared() {
+      let cleared = {};
+      try { cleared = JSON.parse(localStorage.getItem("drawRunStageClears")) || {}; } catch (e) {}
+      for (let m = 1; m <= 4; m++) {
+        for (let s = 1; s <= 3; s++) {
+          if (!cleared["stage" + m + "-" + s]) return false;
+        }
+      }
+      return true;
+    }
+
+    function isUnlocked(char) {
+      if (!char.unlock) return true;
+      if (char.unlock === "score200") return getBestScoreAttack() >= 200;
+      if (char.unlock === "stage4all") return isStage4AllCleared();
+      return true;
+    }
+
+    let currentSkinIndex = parseInt(localStorage.getItem("drawRunSkinIndex")) || 0;
+    if (currentSkinIndex < 0 || currentSkinIndex >= characterList.length) currentSkinIndex = 0;
+    if (!isUnlocked(characterList[currentSkinIndex])) {
+      currentSkinIndex = 0;
+      localStorage.setItem("drawRunSkinIndex", "0");
+    }
+
+    const grid = document.getElementById("skin-grid");
+    const nameDisplay = document.getElementById("skin-name-display");
+    const unlockHint = document.getElementById("unlock-hint");
+
+    function updateHint(index) {
+      const char = characterList[index];
+      if (!char.unlock) {
+        unlockHint.innerHTML = "<strong>" + char.name + "</strong> — 最初から使用可能";
+        return;
+      }
+      const ok = isUnlocked(char);
+      if (ok) {
+        unlockHint.innerHTML = "<span class=\"ok-msg\">✓ 解放済み</span> — " + char.unlockText;
+      } else {
+        let progress = "";
+        if (char.unlock === "score200") {
+          progress = "（現在の最高: " + getBestScoreAttack() + "m）";
+        } else if (char.unlock === "stage4all") {
+          let cleared = {};
+          try { cleared = JSON.parse(localStorage.getItem("drawRunStageClears")) || {}; } catch (e) {}
+          let n = 0;
+          for (let m = 1; m <= 4; m++) for (let s = 1; s <= 3; s++) if (cleared["stage"+m+"-"+s]) n++;
+          progress = "（クリア " + n + " / 12）";
+        }
+        unlockHint.innerHTML = "<span class=\"locked-msg\">🔒 未解放</span><br><strong>条件:</strong> " + char.unlockText + " " + progress;
+      }
+    }
+
+    function selectSkin(index) {
+      const char = characterList[index];
+      updateHint(index);
+      if (!isUnlocked(char)) {
+        nameDisplay.textContent = "未解放: " + char.name;
+        grid.querySelectorAll(".skin-card").forEach((card, i) => {
+          card.classList.toggle("selected", false);
+        });
+        return;
+      }
+      currentSkinIndex = index;
+      localStorage.setItem("drawRunSkinIndex", String(currentSkinIndex));
+      nameDisplay.textContent = "選択中: " + char.name;
+      grid.querySelectorAll(".skin-card").forEach((card, i) => {
+        card.classList.toggle("selected", i === currentSkinIndex);
+      });
+    }
+
+    characterList.forEach((char, i) => {
+      const unlocked = isUnlocked(char);
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "skin-card menu-btn" + (unlocked ? "" : " locked");
+      card.setAttribute("aria-label", char.name);
+      card.innerHTML =
+        (unlocked ? "" : '<span class="lock-badge">🔒</span>') +
+        '<div class="skin-thumb"><img src="' + char.src + '" alt="' + char.name + '"></div>' +
+        '<div class="skin-label">' + char.name + '</div>';
+      card.addEventListener("click", () => selectSkin(i));
+      grid.appendChild(card);
+    });
+    selectSkin(currentSkinIndex);
+
+    const settingBgm = document.getElementById("setting-bgm");
+    const sfxButton = document.getElementById("sfx-button");
+    function isSeEnabled() {
+      return (localStorage.getItem("drawRunSeEnabled") ?? sessionStorage.getItem("drawRunSeEnabled")) !== "false";
+    }
+    function getSeVolume() {
+      const saved = localStorage.getItem("drawRunSeVolume") ?? sessionStorage.getItem("drawRunSeVolume");
+      const value = Number(saved);
+      if (!Number.isFinite(value)) return 0.28;
+      return Math.max(0, Math.min(100, value)) / 100;
+    }
+    function playButtonSfx() {
+      if (!sfxButton || !isSeEnabled()) return;
+      const volume = getSeVolume();
+      if (volume <= 0) return;
+      sfxButton.volume = volume;
+      sfxButton.currentTime = 0;
+      sfxButton.play().catch(() => {});
+    }
+    document.querySelectorAll(".menu-btn").forEach((btn) => {
+      btn.addEventListener("pointerdown", () => playButtonSfx());
+      btn.addEventListener("click", (e) => {
+        if (e.detail === 0) playButtonSfx();
+        if (btn.tagName === "A" || btn.href) {
+          e.preventDefault();
+          setTimeout(() => { window.location.href = btn.href; }, 250);
+        }
+      });
+    });
+
+    const savedVolume = localStorage.getItem("drawRunBgmVolume");
+    const savedPlayState = localStorage.getItem("drawRunBgmPlaying");
+    const savedCurrentTime = localStorage.getItem("drawRunBgmCurrentTime");
+    let isPlaying = savedPlayState !== "false";
+    if (savedVolume !== null) settingBgm.volume = savedVolume / 100;
+    else settingBgm.volume = 0.5;
+    if (savedCurrentTime !== null) settingBgm.currentTime = parseFloat(savedCurrentTime);
+    if (isPlaying) settingBgm.play().catch(() => {});
+    else settingBgm.pause();
+    window.addEventListener("beforeunload", () => {
+      localStorage.setItem("drawRunBgmCurrentTime", settingBgm.currentTime);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>HOW TO PLAY - DRAW RUN</title>
+  <style>
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 3vh;
+      background:
+        radial-gradient(ellipse at 20% 15%, rgba(0, 180, 255, 0.08) 0%, transparent 45%),
+        radial-gradient(ellipse at 80% 80%, rgba(80, 40, 160, 0.12) 0%, transparent 50%),
+        linear-gradient(180deg, #070b16 0%, #0c1224 50%, #0a1020 100%);
+      color: #e8f4ff;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    body { transform-origin: center top; }
+
+    h1 {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      margin: 0 0 12px 0;
+      color: #fff;
+      text-shadow:
+        0 0 12px rgba(0, 229, 255, 0.7),
+        0 0 28px rgba(0, 180, 255, 0.35);
+    }
+
+    .howto-container {
+      background: rgba(8, 16, 32, 0.72);
+      border: 1.5px solid rgba(0, 200, 255, 0.22);
+      border-radius: 18px;
+      padding: 14px 16px;
+      width: 88%;
+      max-width: 380px;
+      max-height: 52vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+      text-align: left;
+      box-sizing: border-box;
+    }
+
+    .howto-container::-webkit-scrollbar { width: 5px; }
+    .howto-container::-webkit-scrollbar-thumb {
+      background: rgba(0, 229, 255, 0.4);
+      border-radius: 3px;
+    }
+
+    .rule-section { margin-bottom: 12px; }
+    .rule-section:last-child { margin-bottom: 4px; }
+
+    .rule-section h2 {
+      font-size: 13px;
+      color: #00e5ff;
+      margin: 0 0 4px 0;
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+    }
+
+    .rule-section p {
+      font-size: 11.5px;
+      line-height: 1.5;
+      margin: 0;
+      color: rgba(210, 225, 240, 0.85);
+    }
+
+    .rule-section strong { color: #7ee8ff; }
+
+    /* ===== 効果音設定 ===== */
+    .se-settings {
+      width: 88%;
+      max-width: 380px;
+      margin-top: 12px;
+      padding: 12px 16px;
+      box-sizing: border-box;
+      background: rgba(8, 16, 32, 0.65);
+      border: 1.5px solid rgba(0, 229, 255, 0.28);
+      border-radius: 16px;
+      box-shadow: 0 0 18px rgba(0, 180, 255, 0.1);
+    }
+
+    .se-settings-title {
+      margin: 0 0 10px 0;
+      color: #00e5ff;
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-align: center;
+      text-shadow: 0 0 8px rgba(0, 229, 255, 0.35);
+    }
+
+    .se-setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .se-label {
+      color: rgba(200, 220, 240, 0.85);
+      font-size: 12px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    #se-volume {
+      flex: 1;
+      min-width: 0;
+      accent-color: #00e5ff;
+      cursor: pointer;
+      transition: opacity 0.15s ease;
+    }
+
+    #se-volume:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    #se-volume-value {
+      width: 42px;
+      color: #00e5ff;
+      font-size: 12px;
+      font-family: monospace;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    #se-toggle {
+      border: 1.5px solid rgba(0, 229, 255, 0.45);
+      border-radius: 18px;
+      padding: 6px 18px;
+      background: rgba(0, 40, 70, 0.5);
+      color: #c8e8ff;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      min-width: 90px;
+      transition: 0.15s ease;
+      letter-spacing: 1px;
+    }
+
+    #se-toggle.on {
+      background: linear-gradient(135deg, rgba(0, 120, 140, 0.7), rgba(0, 200, 220, 0.55));
+      color: #e8ffff;
+      border-color: #00e5ff;
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.3);
+    }
+
+    #se-toggle.off {
+      background: rgba(255, 60, 80, 0.12);
+      color: #ff9b9b;
+      border-color: rgba(255, 80, 100, 0.45);
+    }
+
+    .back-btn {
+      margin-top: 14px;
+      padding: 11px 36px;
+      background: transparent;
+      color: #00e5ff;
+      text-decoration: none;
+      border-radius: 24px;
+      font-weight: bold;
+      font-size: 14px;
+      border: 1.5px solid #00e5ff;
+      box-shadow: 0 0 14px rgba(0, 229, 255, 0.25);
+      cursor: pointer;
+      display: inline-block;
+      text-align: center;
+      letter-spacing: 1px;
+      transition: box-shadow 0.2s, background 0.15s;
+    }
+
+    .back-btn:hover {
+      box-shadow: 0 0 22px rgba(0, 229, 255, 0.45);
+      background: rgba(0, 229, 255, 0.08);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>HOW TO PLAY</h1>
+
+  <div class="howto-container">
+    <div class="rule-section">
+      <h2>✏️ 線を描いて進もう</h2>
+      <p>画面をドラッグすると、プレイヤーの足場になる線を描くことができます。線を上手に使って、大きな穴や障害物を乗り越えましょう！</p>
+    </div>
+    <div class="rule-section">
+      <h2>⚠️ インクの制限とクールダウン</h2>
+      <p>一度に描ける線の長さには制限があります。使い切って線をリリースした後は、少しの間（約0.5秒間）クールダウンが発生するのでタイミングが重要です。</p>
+    </div>
+    <div class="rule-section">
+      <h2>❄️ リングでインクの色（効果）を変えよう</h2>
+      <p>ステージ上に登場する巨大なリング（青や水色）を通過すると、インクの種類が変化します。<br>
+      ・<strong>通常インク</strong>：標準的な足場になります。<br>
+      ・<strong>アイスインク</strong>：ツルツル滑る代わりに、スピードがアップして一気に加速できます！</p>
+    </div>
+    <div class="rule-section">
+      <h2>🚀 ワープアイテムを駆使しよう</h2>
+      <p>紫色のワープアイテムに触れると、最大3個までアイテムをストックできます。右下の丸い「🚀WARP」ボタンをタップすると、ストックを1つ消費して前方に一瞬でワープし、ピンチを切り抜けられます！</p>
+    </div>
+    <div class="rule-section">
+      <h2>🔄 重力反転ゾーン</h2>
+      <p>スコアが進むと「GRAVITY」の警告とともに重力が上下に反転します！天井が床になったり、上下から罠が迫ってくる初見殺しに気をつけましょう。</p>
+    </div>
+    <div class="rule-section">
+      <h2>💀 障害物とゲームオーバー</h2>
+      <p>壁や動くトゲ、隠しトゲなどの障害物にぶつかったり、画面外（上下の落下）に落ちてしまうとゲームオーバーになります。また、プレイヤーが長時間止まってしまうと強制ゲームオーバーになるので常に前へ進み続けましょう！</p>
+    </div>
+  </div>
+
+  <div class="se-settings">
+    <div class="se-settings-title">EFFECT SOUND</div>
+    <div class="se-setting-row">
+      <span class="se-label">音量</span>
+      <input id="se-volume" type="range" min="0" max="100" step="1" value="28" aria-label="効果音の音量">
+      <span id="se-volume-value">28%</span>
+    </div>
+    <div class="se-setting-row">
+      <span class="se-label">効果音</span>
+      <button id="se-toggle" type="button">ON</button>
+    </div>
+  </div>
+
+  <a href="index.html" class="back-btn menu-btn">BACK</a>
+
+  <audio id="setting-bgm" src="title.mp3" loop></audio>
+  <audio id="sfx-button" src="sfx_button.mp3" preload="auto"></audio>
+
+  <script>
+    function adjustScale() {
+      const scale = Math.min(window.innerWidth / 400, window.innerHeight / 700);
+      document.body.style.transform = `scale(${scale > 1 ? 1 : scale})`;
+    }
+    window.addEventListener("load", adjustScale);
+    window.addEventListener("resize", adjustScale);
+
+    const settingBgm = document.getElementById("setting-bgm");
+    const sfxButton = document.getElementById("sfx-button");
+    const seVolume = document.getElementById("se-volume");
+    const seVolumeValue = document.getElementById("se-volume-value");
+    const seToggle = document.getElementById("se-toggle");
+
+    const savedVolume = localStorage.getItem("drawRunBgmVolume");
+    const savedPlayState = localStorage.getItem("drawRunBgmPlaying");
+    const savedCurrentTime = localStorage.getItem("drawRunBgmCurrentTime");
+    let isPlaying = savedPlayState !== "false";
+
+    if (savedVolume !== null) settingBgm.volume = savedVolume / 100;
+    else settingBgm.volume = 0.5;
+    if (savedCurrentTime !== null) settingBgm.currentTime = parseFloat(savedCurrentTime);
+    if (isPlaying) settingBgm.play().catch(() => {});
+    else settingBgm.pause();
+
+    window.addEventListener("beforeunload", () => {
+      localStorage.setItem("drawRunBgmCurrentTime", settingBgm.currentTime);
+    });
+
+    function getHowtoSeValue(key) {
+      try {
+        const localValue = localStorage.getItem(key);
+        if (localValue !== null) return localValue;
+      } catch (e) {}
+      try {
+        const sessionValue = sessionStorage.getItem(key);
+        if (sessionValue !== null) return sessionValue;
+      } catch (e) {}
+      return null;
+    }
+
+    function saveHowtoSeValue(key, value) {
+      const stringValue = String(value);
+      try { localStorage.setItem(key, stringValue); } catch (e) {}
+      try { sessionStorage.setItem(key, stringValue); } catch (e) {}
+    }
+
+    let seEnabled = getHowtoSeValue("drawRunSeEnabled") !== "false";
+    let seCurrentVolume = Number(getHowtoSeValue("drawRunSeVolume"));
+    if (!Number.isFinite(seCurrentVolume)) seCurrentVolume = 28;
+    seCurrentVolume = Math.max(0, Math.min(100, Math.round(seCurrentVolume)));
+
+    seVolume.value = String(seCurrentVolume);
+    seVolumeValue.textContent = `${seCurrentVolume}%`;
+
+    function updateSeToggle() {
+      seToggle.textContent = seEnabled ? "ON" : "OFF";
+      seToggle.classList.toggle("on", seEnabled);
+      seToggle.classList.toggle("off", !seEnabled);
+      seVolume.disabled = !seEnabled;
+      saveHowtoSeValue("drawRunSeEnabled", seEnabled ? "true" : "false");
+    }
+
+    function updateSeVolume() {
+      seCurrentVolume = Math.max(0, Math.min(100, Math.round(Number(seVolume.value))));
+      seVolume.value = String(seCurrentVolume);
+      seVolumeValue.textContent = `${seCurrentVolume}%`;
+      saveHowtoSeValue("drawRunSeVolume", String(seCurrentVolume));
+      if (sfxButton) sfxButton.volume = seCurrentVolume / 100;
+    }
+
+    function playButtonSfx() {
+      if (!sfxButton || !seEnabled || seCurrentVolume <= 0) return;
+      sfxButton.volume = seCurrentVolume / 100;
+      sfxButton.currentTime = 0;
+      const promise = sfxButton.play();
+      if (promise && typeof promise.catch === "function") {
+        promise.catch(() => {});
+      }
+    }
+
+    updateSeToggle();
+    updateSeVolume();
+
+    seVolume.addEventListener("input", updateSeVolume);
+    seToggle.addEventListener("click", () => {
+      seEnabled = !seEnabled;
+      updateSeToggle();
+      if (seEnabled) playButtonSfx();
+    });
+
+    document.querySelectorAll(".menu-btn").forEach((btn) => {
+      btn.addEventListener("pointerdown", () => playButtonSfx());
+      btn.addEventListener("click", (e) => {
+        if (e.detail === 0) playButtonSfx();
+        if (btn.tagName === "A") {
+          e.preventDefault();
+          const targetUrl = btn.href;
+          setTimeout(() => { window.location.href = targetUrl; }, 250);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
